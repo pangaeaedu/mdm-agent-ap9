@@ -1,0 +1,4 @@
+apply from: 'http://nexus.sdp.nd/nexus/service/local/repositories/android/content/com/nd/sdp/sdp-android-aar/1.6.0/sdp-android-aar-1.6.0.gradle'
+
+dependencies {
+}

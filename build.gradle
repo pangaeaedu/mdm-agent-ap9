@@ -1,0 +1,14 @@
+buildscript {
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2"
+    }
+
+    repositories {
+        maven {
+            name 'nd nexus android-public'
+            url "http://nexus.sdp.nd/nexus/content/groups/android-public/"
+        }
+        mavenCentral()
+    }
+}
