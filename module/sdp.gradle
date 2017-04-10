@@ -1,0 +1,149 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+def getReleaseRepositoryUrl() {
+    return "http://nexus.sdp.nd/nexus/content/repositories/android/"
+}
+
+def getSnapshotRepositoryUrl() {
+    return "http://nexus.sdp.nd/nexus/content/repositories/android_snapshot/"
+}
+
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionName VERSION_NAME
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile "src/main/AndroidManifest.xml"
+            java.srcDirs = ["src/main/java"]
+            res.srcDirs = ["src/main/res"]
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                configurePOM(pom)
+
+                repository(url: getReleaseRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+                snapshotRepository(url: getSnapshotRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+            }
+        }
+    }
+
+    task androidJavadocs(type: Javadoc) {
+        failOnError false
+        source = android.sourceSets.main.java.source
+        options {
+            links "http://docs.oracle.com/javase/7/docs/api/"
+            linksOffline "http://d.android.com/reference", "${android.sdkDirectory}/docs/reference"
+        }
+        //classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
+        //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
+
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+    }
+}
+
+private configurePOM(def pom) {
+    pom.project {
+        groupId POM_GROUP_ID
+        artifactId POM_ARTIFACT_ID
+        version VERSION_NAME //ǰ��ʹ��SDP���ݣ��Զ���汾�޸Ĵ˲���
+        name POM_NAME
+        packaging POM_PACKAGING
+        description POM_DESCRIPTION
+    }
+}
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+
+repositories {
+    maven {
+        name 'nd nexus'
+        url "http://nexus.sdp.nd/nexus/content/groups/android-public/"
+    }
+    mavenCentral()
+}
+
+//apply plugin: 'org.sonarqube'
+//sonarqube  {
+//    properties  {
+//        property "sonar.projectKey", POM_GROUP_ID+'.'+POM_ARTIFACT_ID // ÏîÄ¿Ãû³Æ£¬¼ÇµÃÐÞ¸Ä
+//        property "sonar.projectName",  POM_ARTIFACT_ID // ÏîÄ¿Ãû³Æ£¬¼ÇµÃÐÞ¸Ä
+//        property "sonar.projectVersion", VERSION_NAME  // ÏîÄ¿°æ±¾£¬¼ÇµÃÐÞ¸Ä
+//        property "sonar.language", "java"
+//        property "sonar.host.url", "http://sonar.debug.sdp.nd/"
+//        property "sonar.sourceEncoding", "UTF-8"
+//        //property "sonar.profile", "appfactory-module-lint"
+//        //×Ô¶¨Òålint ÐèÒª°Ñsonar.profileÅäÖÃ³É xxx-lint Ïê¼û http://wiki.sdp.nd/index.php?title=Code_review
+//        property "sonar.profile", "android.sdp.nd"
+//        property "sonar.dynamicAnalysis", "reuseReports"
+//        property "sonar.sources", "src/main/java"
+//        property "sonar.tests", android.sourceSets.instrumentTest.java.srcDirs
+//        property 'sonar.import_unknown_files', true
+//        property "sonar.test.binaries", "${buildDir}/intermediates/classes/release"
+//        property "sonar.java.binaries", "${buildDir}/intermediates/classes/release"
+//        property 'sonar.android.lint.reportsPath', "${buildDir}/outputs/lint-results.xml"  //Ìí¼Óandroid lint¼ì²é±¨¸æÊä³ö
+//        property 'sonar.jacoco.reportPath', "${buildDir}/jacoco/testReleaseUnitTest.exec"
+//        property "sonar.jacoco.itReportPath", "$buildDir/jacoco/testReleaseUnitTest.exec"
+//        property 'sonar.junit.reportsPath', "${buildDir}/test-results/testReleaseUnitTest/release"
+//        property 'sonar.surefire.reportsPath', "${buildDir}/test-results/testReleaseUnitTest/release"
+//        property "sonar.cobertura.reportPath", "${buildDir}/reports/coverage/debug/report.xml"
+//        property "sonar.core.codeCoveragePlugin", "cobertura"
+//
+//        property "sonar.java.libraries", android.libraryVariants.javaCompile.classpath + "${android.sdkDirectory}/platforms/${android.compileSdkVersion}"+"${System.properties.'java.home'}/lib"
+//        property "sonar.java.test.libraries", android.libraryVariants.javaCompile.classpath + "${android.sdkDirectory}/platforms/${android.compileSdkVersion}"+"${System.properties.'java.home'}/lib"
+//    }
+//}
+
+

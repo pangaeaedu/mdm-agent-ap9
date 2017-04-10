@@ -1,4 +1,5 @@
-apply from: 'http://nexus.sdp.nd/nexus/service/local/repositories/android/content/com/nd/sdp/sdp-android-aar/1.6.0/sdp-android-aar-1.6.0.gradle'
-
+//apply from: 'http://nexus.sdp.nd/nexus/service/local/repositories/android/content/com/nd/sdp/sdp-android-aar/1.6.0/sdp-android-aar-1.6.0.gradle'
+apply from: 'sdp.gradle'
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
