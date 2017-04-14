@@ -17,6 +17,9 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class PushSdk {
     private RpcClient client = new RpcClient();
@@ -35,16 +38,28 @@ public class PushSdk {
 
     private static long reconnectIntervalMs = 5000;
 
-    private PushSdkCallback callback = null;
+    private List<PushSdkCallback> mPushCallbackList = new ArrayList<>();
 
-    public void startPushSdk(String deviceid, String appid, final PushSdkCallback callback) {
+//    private PushSdkCallback mPushSdkCallback = null;
+
+    /**
+     * push消息回调接口
+     * 需要注册推送的组件需要将自己的callback
+     * 注册进来
+     * @param callback
+     */
+    public void addPushSdkCallback(PushSdkCallback callback) {
+        mPushCallbackList.add(callback);
+    }
+
+    public void startPushSdk(String deviceid, String appid) {
         synchronized (this) {
 //            log.warn("start push sdk , deviceid {}, appid {} , started {}", deviceid, appid, started);
             if (started) {
                 return;
             }
             started = true;
-            this.callback = callback;
+//            this.mPushSdkCallback = callback;
             this.deviceid = deviceid;
             this.appid = appid;
         }
@@ -85,8 +100,7 @@ public class PushSdk {
                 new IRpcListener() {
                     @Override
                     public void onClientDisconnected(Channel channel, String reason) {
-//                        log.warn("push server disconnected, startflag {}", started);
-//                        EventBus.getDefault().post(new PushConnectStatusEvent(false));
+                        notifyClientConnectStatus(false);
                         if (started) {
                             startConnect();
                         }
@@ -112,14 +126,13 @@ public class PushSdk {
                                                             deviceid, appid, responseMsg.getErrCode(), responseMsg.getErrMsg());
                                                     channel.close();
                                                 } else {
-//                                                     EventBus.getDefault().post(new PushConnectStatusEvent(true));
                                                     log.info("push sdk register device id success, deviceid {} , appid {} ", deviceid, appid);
                                                 }
                                                 return null;
                                             }
                                         });
                             }
-//                            new PostDeviceInfoEvent().post();
+                            notifyClientConnectStatus(true);
                         } catch (Exception e) {
 //                            log.warn("push sdk send register req failed, {}", ExceptionUtils.getFullStackTrace(e));
                             channel.close();
@@ -149,19 +162,20 @@ public class PushSdk {
                                         log.warn("get push msg, deviceid {} , appid {}, msgid {}, contentlen {}",
                                                 deviceid, appid, notify.getMsgid(), notify.getContent().size());
 
-                                        final byte[] responseContent =
-                                                callback.onPushMessage(notify.getAppid(), notify.getContent().toByteArray());
                                         Push.PushMsgAckRequest.Builder ackbuilder = Push.PushMsgAckRequest.newBuilder();
-                                        ackbuilder.setMsgid(notify.getMsgid());
-                                        ackbuilder.setAppid(notify.getAppid());
-                                        int len = 0;
-                                        if (null != responseContent) {
-                                            len = responseContent.length;
-                                            ackbuilder.setAckContent(ByteString.copyFrom(responseContent));
-                                        }
+                                        notifyPushMessage(notify,ackbuilder);
+//                                        final byte[] responseContent =
+//                                                mPushSdkCallback.onPushMessage(notify.getAppid(), notify.getContent().toByteArray());
+//                                        ackbuilder.setMsgid(notify.getMsgid());
+//                                        ackbuilder.setAppid(notify.getAppid());
+//                                        int len = 0;
+//                                        if (null != responseContent) {
+//                                            len = responseContent.length;
+//                                            ackbuilder.setAckContent(ByteString.copyFrom(responseContent));
+//                                        }
 
-                                        log.warn("push msg response, deviceid {} , appid {}, msgid {}, responselen {}",
-                                                deviceid, appid, notify.getMsgid(), len);
+//                                        log.warn("push msg response, deviceid {} , appid {}, msgid {}, responselen {}",
+//                                                deviceid, appid, notify.getMsgid(), len);
 
                                         try {
                                             rpcChannel.rpcRequest(
@@ -205,5 +219,32 @@ public class PushSdk {
         rpcChannel = client.createRpcChannel("172.24.133.115", 8099, false, listener);
     }
 
+    private void notifyClientConnectStatus(boolean isConnected) {
+        for (PushSdkCallback callback : mPushCallbackList) {
+            callback.onClientConnected(isConnected);
+        }
+    }
+
+    private void notifyPushMessage(Push.PushMsgNotify notify,Push.PushMsgAckRequest.Builder ackbuilder) {
+        byte[] responseContent;
+        for (PushSdkCallback callback : mPushCallbackList) {
+            responseContent = callback.onPushMessage(notify.getAppid(), notify.getContent().toByteArray());
+            replyAckContent(ackbuilder,notify,responseContent);
+        }
+    }
+
+    /**
+     * 回复确认消息
+     * @param ackbuilder
+     * @param notify
+     * @param responseContent
+     */
+    private void replyAckContent(Push.PushMsgAckRequest.Builder ackbuilder,Push.PushMsgNotify notify, byte[] responseContent) {
+        ackbuilder.setMsgid(notify.getMsgid());
+        ackbuilder.setAppid(notify.getAppid());
+        if (null != responseContent) {
+            ackbuilder.setAckContent(ByteString.copyFrom(responseContent));
+        }
+    }
 
 }

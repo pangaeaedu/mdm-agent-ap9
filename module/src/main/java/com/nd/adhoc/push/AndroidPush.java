@@ -41,6 +41,7 @@ public class AndroidPush {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                pushSdk.addPushSdkCallback(callback);
                 if (started.get()) {
                     return;
                 }
@@ -51,7 +52,7 @@ public class AndroidPush {
 
                 final String deviceId = DeviceUtil.generateDeviceId(context);
                 final String packageName = context.getPackageName().replace(".", "_");
-                pushSdk.startPushSdk(deviceId, packageName, callback);
+                pushSdk.startPushSdk(deviceId, packageName);
                 AndroidPush.deviceId = pushSdk.getDeviceid();
             }
         }).start();
