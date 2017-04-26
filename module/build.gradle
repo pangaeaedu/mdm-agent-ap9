@@ -3,3 +3,12 @@ apply from: 'sdp.gradle'
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+android {
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+    }
+}
