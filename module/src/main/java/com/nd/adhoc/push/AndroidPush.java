@@ -61,4 +61,8 @@ public class AndroidPush {
     public static String getDeviceId() {
         return deviceId;
     }
+
+    public boolean isConnected() {
+        return pushSdk.isConnected();
+    }
 }

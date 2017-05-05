@@ -19,9 +19,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class PushSdk {
+    //private static String DEFAULT_PUSH_SERVER_IP = "172.24.133.115";
+    private static String DEFAULT_PUSH_SERVER_IP = "lbsim.aws.101.com";
+    private static int DEFAULT_PUSH_SERVER_PORT = 8099;
+
     private RpcClient client = new RpcClient();
 
     private static Logger log = LoggerFactory.getLogger("PushSdk");
@@ -39,6 +44,8 @@ public class PushSdk {
     private static long reconnectIntervalMs = 5000;
 
     private List<PushSdkCallback> mPushCallbackList = new ArrayList<>();
+
+    private AtomicBoolean mIsConnected = new AtomicBoolean(false);
 
 //    private PushSdkCallback mPushSdkCallback = null;
 
@@ -141,7 +148,7 @@ public class PushSdk {
 
                     @Override
                     public void onClientMessage(final Channel channel, Message rpcPacket) {
-
+                        notifyClientConnectStatus(true);
                         if (rpcPacket.getHeader().op.get() == Package.OP.OP_REQUEST_VALUE) {
                             Package.Body body = rpcPacket.getBodyBuilder().build();
                             // 处理请求
@@ -216,10 +223,11 @@ public class PushSdk {
                     }
                 };
 
-        rpcChannel = client.createRpcChannel("172.24.133.115", 8099, false, listener);
+        rpcChannel = client.createRpcChannel(DEFAULT_PUSH_SERVER_IP, DEFAULT_PUSH_SERVER_PORT, false, listener);
     }
 
     private void notifyClientConnectStatus(boolean isConnected) {
+        mIsConnected.set(isConnected);
         for (PushSdkCallback callback : mPushCallbackList) {
             callback.onClientConnected(isConnected);
         }
@@ -245,6 +253,10 @@ public class PushSdk {
         if (null != responseContent) {
             ackbuilder.setAckContent(ByteString.copyFrom(responseContent));
         }
+    }
+
+    public boolean isConnected() {
+        return mIsConnected.get();
     }
 
 }
