@@ -23,10 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class PushSdk {
-    //private static String DEFAULT_PUSH_SERVER_IP = "172.24.133.115";
-    private static String DEFAULT_PUSH_SERVER_IP = "lbsim.aws.101.com";
-    private static int DEFAULT_PUSH_SERVER_PORT = 8099;
-
     private RpcClient client = new RpcClient();
 
     private static Logger log = LoggerFactory.getLogger("PushSdk");
@@ -47,7 +43,14 @@ public class PushSdk {
 
     private AtomicBoolean mIsConnected = new AtomicBoolean(false);
 
-//    private PushSdkCallback mPushSdkCallback = null;
+    private String mIp;
+
+    private int mPort;
+
+    public PushSdk(String ip, int port){
+        mIp = ip;
+        mPort = port;
+    }
 
     /**
      * push消息回调接口
@@ -223,7 +226,7 @@ public class PushSdk {
                     }
                 };
 
-        rpcChannel = client.createRpcChannel(DEFAULT_PUSH_SERVER_IP, DEFAULT_PUSH_SERVER_PORT, false, listener);
+        rpcChannel = client.createRpcChannel(mIp, mPort, false, listener);
     }
 
     private void notifyClientConnectStatus(boolean isConnected) {

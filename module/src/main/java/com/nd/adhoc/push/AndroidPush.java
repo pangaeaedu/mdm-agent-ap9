@@ -24,7 +24,7 @@ public class AndroidPush {
         return inst;
     }
 
-    private PushSdk pushSdk = new PushSdk();
+    private PushSdk pushSdk;
     private static String deviceId = null;
     BroadcastReceiver receiver =
             new BroadcastReceiver() {
@@ -36,7 +36,8 @@ public class AndroidPush {
 
     AtomicBoolean started = new AtomicBoolean(false);
 
-    public void startPushSdk(final Context context, final PushSdkCallback callback) {
+    public synchronized void startPushSdk(final Context context, String ip, int port, final PushSdkCallback callback) {
+        pushSdk = new PushSdk(ip, port);
 
         new Thread(new Runnable() {
             @Override
@@ -62,7 +63,10 @@ public class AndroidPush {
         return deviceId;
     }
 
-    public boolean isConnected() {
-        return pushSdk.isConnected();
+    public synchronized boolean isConnected() {
+        if (pushSdk!=null) {
+            return pushSdk.isConnected();
+        }
+        return false;
     }
 }
