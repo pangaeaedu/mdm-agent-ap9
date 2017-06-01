@@ -1,6 +1,7 @@
 //apply from: 'http://nexus.sdp.nd/nexus/service/local/repositories/android/content/com/nd/sdp/sdp-android-aar/1.6.0/sdp-android-aar-1.6.0.gradle'
 apply from: 'sdp.gradle'
 dependencies {
+    compile 'org.slf4j:slf4j-android:1.7.21'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 android {

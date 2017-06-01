@@ -64,7 +64,7 @@ public class PushSdk {
 
     public void startPushSdk(String deviceid, String appid) {
         synchronized (this) {
-//            log.warn("start push sdk , deviceid {}, appid {} , started {}", deviceid, appid, started);
+            log.warn("start push sdk , deviceid {}, appid {} , started {}", deviceid, appid, started);
             if (started) {
                 return;
             }
@@ -82,10 +82,9 @@ public class PushSdk {
 
     //Todo
     public void restartPushSdk() {
-//        log.warn("restart push sdk , deviceid {}, appid {} , started {}", deviceid, appid, started);
+        log.warn("restart push sdk , deviceid {}, appid {} , started {}", deviceid, appid, started);
         if (null != rpcChannel) {
             rpcChannel.close();
-            rpcChannel = null;
         }
     }
 
@@ -101,7 +100,7 @@ public class PushSdk {
             try {
                 Thread.sleep(reconnectIntervalMs - (System.currentTimeMillis() - lastReconnectMs));
             } catch (InterruptedException e) {
-//                log.warn("sleep exception {}", ExceptionUtils.getFullStackTrace(e));
+                log.warn("sleep exception {}", ExceptionUtils.getFullStackTrace(e));
             }
         }
 
@@ -118,7 +117,7 @@ public class PushSdk {
 
                     @Override
                     public void onClientConnect(final Channel channel, boolean bssh) {
-//                        log.warn("push sdk connected, localaddr {} remoteaddr {}", channel.localAddress(), channel.remoteAddress());
+                        log.warn("push sdk connected, localaddr {} remoteaddr {}", channel.localAddress(), channel.remoteAddress());
                         try {
                             Push.PushRegisterRequest registerRequest = Push.PushRegisterRequest.newBuilder().setAppid(appid).build();
                             if (rpcChannel != null) {
@@ -137,14 +136,14 @@ public class PushSdk {
                                                     channel.close();
                                                 } else {
                                                     log.info("push sdk register device id success, deviceid {} , appid {} ", deviceid, appid);
+                                                    notifyClientConnectStatus(true);
                                                 }
                                                 return null;
                                             }
                                         });
                             }
-                            notifyClientConnectStatus(true);
                         } catch (Exception e) {
-//                            log.warn("push sdk send register req failed, {}", ExceptionUtils.getFullStackTrace(e));
+                            log.warn("push sdk send register req failed, {}", ExceptionUtils.getFullStackTrace(e));
                             channel.close();
                         }
                     }
