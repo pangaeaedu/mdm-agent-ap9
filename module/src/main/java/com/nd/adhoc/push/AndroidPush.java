@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.telephony.TelephonyManager;
 
+import com.nd.adhoc.push.client.libpushclient;
 import com.nd.adhoc.push.pushsdk.PushSdk;
 import com.nd.adhoc.push.pushsdk.PushSdkCallback;
 import com.nd.adhoc.push.util.DeviceUtil;
+
+import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -52,8 +56,18 @@ public class AndroidPush {
                 context.registerReceiver(receiver, filter);
 
                 final String deviceId = DeviceUtil.generateDeviceId(context);
-                final String packageName = context.getPackageName().replace(".", "_");
-                pushSdk.startPushSdk(deviceId, packageName);
+                final String packageName = context.getPackageName();
+                final String appId = "mdm";
+                File sdCard = Environment.getExternalStorageDirectory();
+                if (null==sdCard){
+                    sdCard = Environment.getDownloadCacheDirectory();
+                }
+                if (null!=sdCard) {
+                    String logpath = sdCard + "/" + packageName + "/adhoclog/";
+                    libpushclient.native_pushInit(logpath);
+                }
+
+                pushSdk.startPushSdk(deviceId, appId);
                 AndroidPush.deviceId = pushSdk.getDeviceid();
             }
         }).start();
@@ -68,5 +82,9 @@ public class AndroidPush {
             return pushSdk.isConnected();
         }
         return false;
+    }
+
+    public synchronized PushSdk getPushSdk() {
+        return pushSdk;
     }
 }

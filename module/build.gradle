@@ -11,4 +11,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/NOTICE'
     }
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+    }
 }
