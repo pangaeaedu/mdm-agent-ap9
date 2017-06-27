@@ -1,8 +1,7 @@
 package com.nd.adhoc.push.client;
 
 
-import com.nd.adhoc.push.AndroidPush;
-import com.nd.adhoc.push.pushsdk.PushSdk;
+import com.nd.adhoc.push.PushSdk;
 
 public class libpushclient {
 
@@ -35,24 +34,15 @@ public class libpushclient {
     private static native void native_class_init();
 
     public static void onPushMessage(long msgid, long msgTime, byte[] data) {
-        PushSdk pushSdk = AndroidPush.getInst().getPushSdk();
-        if (pushSdk!=null) {
-            pushSdk.notifyPushMessage(msgid, msgTime, data);
-        }
+        PushSdk.getInstance().notifyPushMessage(msgid, msgTime, data);
     }
 
     public static void onPushLoginResult(int errCode, String errMsg) {
-        PushSdk pushSdk = AndroidPush.getInst().getPushSdk();
-        if (pushSdk!=null) {
-            pushSdk.notifyClientConnectStatus(errCode==0);
-        }
+        PushSdk.getInstance().notifyClientConnectStatus(errCode==0);
     }
 
     public static void onPushLoggedOut() {
-        PushSdk pushSdk = AndroidPush.getInst().getPushSdk();
-        if (pushSdk!=null) {
-            pushSdk.notifyClientConnectStatus(false);
-        }
+        PushSdk.getInstance().notifyClientConnectStatus(false);
     }
 }
 
