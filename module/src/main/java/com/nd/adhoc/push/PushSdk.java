@@ -47,6 +47,7 @@ public class PushSdk {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    mPushCallback.onClientConnected(false);
                     restartPushSdk();
                 }
             };
