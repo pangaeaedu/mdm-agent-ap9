@@ -47,7 +47,6 @@ public class PushSdk {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    mPushCallback.onClientConnected(false);
                     restartPushSdk();
                 }
             };
@@ -95,6 +94,7 @@ public class PushSdk {
      */
     public synchronized void restartPushSdk() {
         log.warn("restart push sdk , ip {}, port {}, deviceid {}, appid {}", mIp, mPort, mAppid, mDeviceid);
+        doNotifyClientConnectStatus(false);
         libpushclient.native_pushLogin(mIp, mPort, mAppid, mDeviceid, mReconnectIntervalMs);
     }
 
@@ -120,8 +120,15 @@ public class PushSdk {
     }
 
     public synchronized void notifyClientConnectStatus(boolean isConnected) {
-        mIsConnected = isConnected;
-        mPushCallback.onClientConnected(isConnected);
+        doNotifyClientConnectStatus(isConnected);
+    }
+
+    private void doNotifyClientConnectStatus(boolean isConnected) {
+        log.warn("doNotifyClientConnectStatus , currentStatus {} , newStatus {}", mIsConnected, isConnected);
+        if (isConnected!=mIsConnected) {
+            mIsConnected = isConnected;
+            mPushCallback.onClientConnected(isConnected);
+        }
     }
 
     public synchronized void notifyPushMessage(long msgId, long msgTime, byte[] data) {
