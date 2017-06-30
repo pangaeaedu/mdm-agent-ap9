@@ -24,7 +24,7 @@ public class PushSdk {
 
     private int mPort;
 
-    private String mDeviceid = "";
+    private String mDeviceid;
 
     private String mAppid;
 
@@ -56,13 +56,13 @@ public class PushSdk {
      *
      * @param context           context
      * @param appid             从Push后台申请的appId
+     * @param deviceid          指定本机的deviceid
      * @param ip                push服务的IP
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    public synchronized void startPushSdk(final Context context, String appid, String ip, int port, PushSdkCallback pushCallback) {
+    private void doStartPushSdk(final Context context, String appid, String deviceid, String ip, int port, PushSdkCallback pushCallback) {
         if (!mInited) {
-            mDeviceid = DeviceUtil.generateDeviceId(context);
             final String packageName = context.getPackageName();
             File sdCard = Environment.getExternalStorageDirectory();
             if (null==sdCard){
@@ -72,6 +72,14 @@ public class PushSdk {
                 String logPath = sdCard + "/" + packageName + "/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
+        }
+
+        if (deviceid==null) {
+            if (mDeviceid==null) {
+                mDeviceid = DeviceUtil.generateDeviceId(context);
+            }
+        } else {
+            mDeviceid = deviceid;
         }
 
         log.warn("start push sdk , ip {}, port {}, deviceid {}, appid {}", ip, port, mDeviceid, appid);
@@ -90,10 +98,37 @@ public class PushSdk {
     }
 
     /**
+     * 开始接收Push消息
+     *
+     * @param context           context
+     * @param appid             从Push后台申请的appId
+     * @param ip                push服务的IP
+     * @param port              push服务的端口
+     * @param pushCallback      消息到来的回调
+     */
+    public synchronized void startPushSdk(final Context context, String appid, String ip, int port, PushSdkCallback pushCallback) {
+        doStartPushSdk(context, appid, null, ip, port, pushCallback);
+    }
+
+    /**
+     * 开始接收Push消息
+     *
+     * @param context           context
+     * @param appid             从Push后台申请的appId
+     * @param deviceid          指定本机的deviceid
+     * @param ip                push服务的IP
+     * @param port              push服务的端口
+     * @param pushCallback      消息到来的回调
+     */
+    public synchronized void startPushSdk(final Context context, String appid, String deviceid, String ip, int port, PushSdkCallback pushCallback) {
+        doStartPushSdk(context, appid, deviceid, ip, port, pushCallback);
+    }
+
+    /**
      * 断开并重新连接push服务
      */
     public synchronized void restartPushSdk() {
-        log.warn("restart push sdk , ip {}, port {}, deviceid {}, appid {}", mIp, mPort, mAppid, mDeviceid);
+        log.warn("restart push sdk , ip {}, port {}, appid {}, deviceid {}", mIp, mPort, mAppid, mDeviceid);
         doNotifyClientConnectStatus(false);
         libpushclient.native_pushLogin(mIp, mPort, mAppid, mDeviceid, mReconnectIntervalMs);
     }
