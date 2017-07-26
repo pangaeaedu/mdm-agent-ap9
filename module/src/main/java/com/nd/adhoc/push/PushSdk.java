@@ -24,9 +24,18 @@ public class PushSdk {
 
     private int mPort;
 
-    private String mDeviceid;
+    // 从服务端获取
+    private String mDevicetoken;
 
     private String mAppid;
+
+    private String mManufactor;
+
+    private String mImei;
+
+    private String mMac;
+
+    private String mAndroidId;
 
     private int mReconnectIntervalMs = 30000;
 
@@ -56,7 +65,6 @@ public class PushSdk {
      *
      * @param context           context
      * @param appid             从Push后台申请的appId
-     * @param deviceid          指定本机的deviceid
      * @param ip                push服务的IP
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
@@ -72,22 +80,25 @@ public class PushSdk {
                 String logPath = sdCard + "/" + packageName + "/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
-        }
 
-        if (deviceid==null) {
-            if (mDeviceid==null) {
-                mDeviceid = DeviceUtil.generateDeviceId(context);
+            String pseudoId = DeviceUtil.getPseudoId();
+            String pseudoIdLong = DeviceUtil.getPseudoIDLong();
+
+            mManufactor = DeviceUtil.getManufactorer();
+            mImei = DeviceUtil.getImei(context);
+            if (null==mImei) {
+                mImei = pseudoId;
             }
-        } else {
-            mDeviceid = deviceid;
+            mMac = DeviceUtil.getMac(context);
+            mAndroidId = DeviceUtil.getAndroidId(context);
         }
-
-        log.warn("start push sdk , ip {}, port {}, deviceid {}, appid {}", ip, port, mDeviceid, appid);
+        log.warn("start push sdk , ip {}, port {}, appid {}, manufactorer {}, imei {}, mac {}, androidid {}",
+                ip, port, appid, mManufactor, mImei, mMac, mAndroidId);
         mIp = ip;
         mPort = port;
         mAppid = appid;
         mPushCallback = pushCallback;
-        libpushclient.native_pushLogin(mIp, mPort, mAppid, mDeviceid, mReconnectIntervalMs);
+        libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
 
         if (!mInited) {
             IntentFilter filter = new IntentFilter();
@@ -111,33 +122,20 @@ public class PushSdk {
     }
 
     /**
-     * 开始接收Push消息
-     *
-     * @param context           context
-     * @param appid             从Push后台申请的appId
-     * @param deviceid          指定本机的deviceid
-     * @param ip                push服务的IP
-     * @param port              push服务的端口
-     * @param pushCallback      消息到来的回调
-     */
-    public synchronized void startPushSdk(final Context context, String appid, String deviceid, String ip, int port, PushSdkCallback pushCallback) {
-        doStartPushSdk(context, appid, deviceid, ip, port, pushCallback);
-    }
-
-    /**
      * 断开并重新连接push服务
      */
     public synchronized void restartPushSdk() {
-        log.warn("restart push sdk , ip {}, port {}, appid {}, deviceid {}", mIp, mPort, mAppid, mDeviceid);
+        log.warn("restart push sdk , ip {}, port {}, appid {}, manufactorer {}, imei {}, mac {}, androidid {}",
+                mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId);
         doNotifyClientConnectStatus(false);
-        libpushclient.native_pushLogin(mIp, mPort, mAppid, mDeviceid, mReconnectIntervalMs);
+        libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
     }
 
     /**
      * 停止接收push消息
      */
     public synchronized void stop() {
-        libpushclient.native_pushLogout();
+        libpushclient.native_pushDisconnect();
     }
 
     /**
@@ -151,7 +149,7 @@ public class PushSdk {
      * @return 返回deviceId
      */
     public synchronized String getDeviceid() {
-        return mDeviceid;
+        return mDevicetoken;
     }
 
     public synchronized void notifyClientConnectStatus(boolean isConnected) {
@@ -162,18 +160,25 @@ public class PushSdk {
         log.warn("doNotifyClientConnectStatus , currentStatus {} , newStatus {}", mIsConnected, isConnected);
         if (isConnected!=mIsConnected) {
             mIsConnected = isConnected;
-            mPushCallback.onClientConnected(isConnected);
+            mPushCallback.onPushStatus(isConnected);
         }
     }
 
-    public synchronized void notifyPushMessage(long msgId, long msgTime, byte[] data) {
-        byte[] responseContent;
-        responseContent = mPushCallback.onPushMessage(mAppid, data);
-        replyAckContent(msgId, msgTime,responseContent);
+    public synchronized void notifyDeviceToken(String deviceToken) {
+        log.info("notifyDeviceToken {}", deviceToken);
+        mDevicetoken = deviceToken;
+        mPushCallback.onPushDeviceToken(deviceToken);
     }
 
-    private synchronized void replyAckContent(long msgId, long msgTime, byte[] responseContent) {
-        libpushclient.native_pushAckMsg(msgId);
+    public synchronized void notifyPushMessage(long msgId, long msgTime, byte[] data) {
+//        byte[] responseContent;
+//        responseContent =
+        mPushCallback.onPushMessage(mAppid, data);
+        //replyAckContent(msgId, msgTime,responseContent);
     }
+
+//    private synchronized void replyAckContent(long msgId, long msgTime, byte[] responseContent) {
+//        libpushclient.native_pushAckMsg(msgId);
+//    }
 
 }

@@ -22,10 +22,10 @@ public class libpushclient {
     public static native void native_pushInit(String logPath);
 
     // 开始接收Push消息
-    public static native void native_pushLogin(String ip, int port, String appId, String deviceId, int timeoutMs);
+    public static native void native_pushLogin(String ip, int port, String appId, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
 
     // 停止接收Push消息
-    public static native void native_pushLogout();
+    public static native void native_pushDisconnect();
 
     // 标记消息已读
     public static native void native_pushAckMsg(long msgId);
@@ -33,15 +33,19 @@ public class libpushclient {
     // Jni初始化
     private static native void native_class_init();
 
-    public static void onPushMessage(long msgid, long msgTime, byte[] data) {
+    public static void onPushDeviceToken(String deviceToken) {
+        PushSdk.getInstance().notifyDeviceToken(deviceToken);
+    }
+
+    public static void onPushMessage(String appId, long msgid, long msgTime, byte[] data) {
         PushSdk.getInstance().notifyPushMessage(msgid, msgTime, data);
     }
 
-    public static void onPushLoginResult(int errCode, String errMsg) {
+    public static void onPushLoginResult(String appId, int errCode, String errMsg) {
         PushSdk.getInstance().notifyClientConnectStatus(errCode==0);
     }
 
-    public static void onPushLoggedOut() {
+    public static void onPushDisconnected() {
         PushSdk.getInstance().notifyClientConnectStatus(false);
     }
 }
