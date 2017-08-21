@@ -43,6 +43,8 @@ public class PushSdk {
 
     private boolean mIsConnected = false;
 
+    private boolean mIsFirst = true;
+
     private boolean mInited = false;
 
     public static PushSdk getInstance() {
@@ -158,7 +160,8 @@ public class PushSdk {
 
     private void doNotifyClientConnectStatus(boolean isConnected) {
         log.warn("doNotifyClientConnectStatus , currentStatus {} , newStatus {}", mIsConnected, isConnected);
-        if (isConnected!=mIsConnected) {
+        if (isConnected!=mIsConnected || mIsFirst) {
+            mIsFirst = false;
             mIsConnected = isConnected;
             mPushCallback.onPushStatus(isConnected);
         }
