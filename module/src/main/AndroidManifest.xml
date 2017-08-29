@@ -9,7 +9,13 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application>
-
+        <service
+            android:name="com.nd.adhoc.push.service.PushService">
+            <intent-filter>
+                <action android:name="com.nd.adhoc.push.service.PushService" />
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+    </service>
     </application>
 
 </manifest>
