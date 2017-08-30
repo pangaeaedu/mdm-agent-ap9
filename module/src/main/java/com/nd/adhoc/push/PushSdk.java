@@ -35,7 +35,6 @@ public class PushSdk {
     private PushService mPushService;
 
     public static PushSdk getInstance() {
-        log.info("getInstance()");
         return instance;
     }
 
@@ -122,7 +121,6 @@ public class PushSdk {
      * @return 返回是否与push服务连接着
      */
     public synchronized boolean isConnected() {
-        log.info("isConnected()");
         if (mPushService != null) {
             return mPushService.isConnected();
         } else {
@@ -134,7 +132,6 @@ public class PushSdk {
      * @return 返回deviceId
      */
     public synchronized String getDeviceid() {
-        log.info("getDeviceid()");
         if (mPushService != null) {
             return mPushService.getDeviceid();
         } else {
@@ -143,21 +140,18 @@ public class PushSdk {
     }
 
     public synchronized void notifyClientConnectStatus(boolean isConnected) {
-        log.info("notifyClientConnectStatus()");
         if (mPushService != null) {
             mPushService.notifyClientConnectStatus(isConnected);
         }
     }
 
     public synchronized void notifyDeviceToken(String deviceToken) {
-        log.info("notifyDeviceToken()");
         if (mPushService != null) {
             mPushService.notifyDeviceToken(deviceToken);
         }
     }
 
     public synchronized void notifyPushMessage(long msgId, long msgTime, byte[] data) {
-        log.info("notifyPushMessage()");
         if (mPushService != null) {
             mPushService.notifyPushMessage(msgId, msgTime, data);
         }

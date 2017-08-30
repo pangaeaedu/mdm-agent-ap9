@@ -24,6 +24,10 @@ import org.slf4j.LoggerFactory;
  * <p>
  * PushService(Push服务)主要用來保證被启动后将在后台一直运行，即使启动服务的组件（Activity）已销毁也不受影响。
  * 也尝试在该应用被强制删除后，自动唤起 。
+ *
+ * TODO : Service 中的 IBinder 方法未完, 目前的寫法有下列問題
+ *         1. 使用方如果使用非主線程方式調用, 有機率發生崩潰
+ *         2. 如果將 Service 設成單獨線程, 會有崩潰機率
  */
 
 public class PushService extends Service {
