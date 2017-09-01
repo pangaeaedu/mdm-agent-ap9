@@ -3,9 +3,9 @@ package com.nd.adhoc.push.module;
 import android.content.Context;
 import android.os.Environment;
 
-import com.nd.adhoc.push.PushSdkCallback;
 import com.nd.adhoc.push.client.libpushclient;
 import com.nd.adhoc.push.util.DeviceUtil;
+import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +18,7 @@ import java.io.File;
 
 public class PushSdkModule {
     private static Logger log = LoggerFactory.getLogger(PushSdkModule.class.getSimpleName());
+    private static PushSdkModule instance = new PushSdkModule();
 
     private String mIp;
 
@@ -38,13 +39,17 @@ public class PushSdkModule {
 
     private int mReconnectIntervalMs = 30000;
 
-    private PushSdkCallback mPushCallback;
+    private IPushSdkCallback mPushCallback;
 
     private boolean mIsConnected = false;
 
     private boolean mIsFirst = true;
 
     private boolean mInited = false;
+
+    public static PushSdkModule getInstance() {
+        return instance;
+    }
 
     /**
      * 开始接收Push消息
@@ -55,7 +60,7 @@ public class PushSdkModule {
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    private void doStartPushSdk(final Context context, String appid, String deviceid, String ip, int port, PushSdkCallback pushCallback) {
+    private void doStartPushSdk(final Context context, String appid, String deviceid, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
             final String packageName = context.getPackageName();
             File sdCard = Environment.getExternalStorageDirectory();
@@ -98,7 +103,7 @@ public class PushSdkModule {
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    public void startPushSdk(final Context context, String appid, String ip, int port, PushSdkCallback pushCallback) {
+    public void startPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
         doStartPushSdk(context, appid, null, ip, port, pushCallback);
     }
 
@@ -144,7 +149,12 @@ public class PushSdkModule {
             mIsFirst = false;
             mIsConnected = isConnected;
             if (mPushCallback != null) {
-                mPushCallback.onPushStatus(isConnected);
+                try {
+                    mPushCallback.onPushStatus(isConnected);
+                } catch (Exception e) {
+                    mPushCallback = null;
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -153,13 +163,23 @@ public class PushSdkModule {
         log.info("notifyDeviceToken {}", deviceToken);
         mDevicetoken = deviceToken;
         if (mPushCallback != null) {
-            mPushCallback.onPushDeviceToken(deviceToken);
+            try {
+                mPushCallback.onPushDeviceToken(deviceToken);
+            } catch (Exception e) {
+                mPushCallback = null;
+                e.printStackTrace();
+            }
         }
     }
 
     public void notifyPushMessage(long msgId, long msgTime, byte[] data) {
         if (mPushCallback != null) {
-            mPushCallback.onPushMessage(mAppid, data);
+            try {
+                mPushCallback.onPushMessage(mAppid, data);
+            } catch (Exception e) {
+                mPushCallback = null;
+                e.printStackTrace();
+            }
         }
     }
 

@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.RemoteException;
 
 import com.nd.adhoc.push.service.PushService;
+import com.nd.sdp.adhoc.push.IPushSdkCallback;
+import com.nd.sdp.adhoc.push.IPushService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +27,45 @@ public class PushSdk {
 
     private String mAppid;
 
-    private PushSdkCallback mPushCallback;
+    private IPushSdkCallback mPushCallback;
 
     /**
      * ServiceConnection代表与服务的连接，它只有两个方法，
      * onServiceConnected和onServiceDisconnected，
      * 前者是在操作者在连接一个服务成功时被调用，而后者是在服务崩溃或被杀死导致的连接中断时被调用
      */
-    private ServiceConnection mServiceConnection;
-    private PushService mPushService;
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        /**
+         * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
+         * 通过这个IBinder对象，实现宿主和Service的交互。
+         */
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            log.info("PushSdk mServiceConnection onServiceConnected()");
+            // 获取Binder
+            mPushService = IPushService.Stub.asInterface(binder);
+            if (mPushService != null) {
+                try {
+                    mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /**
+         * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
+         * 例如内存的资源不足时这个方法才被自动调用。
+         */
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            log.info("PushSdk mServiceConnection onServiceDisconnected()");
+            mPushService = null;
+            startPushService(mContext);
+        }
+    };
+
+    private IPushService mPushService;
 
     public static PushSdk getInstance() {
         return instance;
@@ -47,34 +80,8 @@ public class PushSdk {
      * @param port         push服务的端口
      * @param pushCallback 消息到来的回调
      */
-    public synchronized void startPushSdk(final Context context, String appid, String ip, int port, PushSdkCallback pushCallback) {
+    public synchronized void startPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
         log.info("startPushSdk()");
-        mServiceConnection = new ServiceConnection() {
-            /**
-             * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
-             * 通过这个IBinder对象，实现宿主和Service的交互。
-             */
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                log.info("onServiceConnected()");
-                // 获取Binder
-                PushService.PushServiceBinder binder = (PushService.PushServiceBinder) service;
-                mPushService = binder.getService();
-                if (mPushService != null) {
-                    mPushService.startPushSdk(mContext, mAppid, mIp, mPort, mPushCallback);
-                }
-            }
-
-            /**
-             * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
-             * 例如内存的资源不足时这个方法才被自动调用。
-             */
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                log.info("onServiceDisconnected()");
-                mPushService = null;
-            }
-        };
         mContext = context.getApplicationContext();
         mIp = ip;
         mPort = port;
@@ -82,10 +89,13 @@ public class PushSdk {
         mPushCallback = pushCallback;
 
         if (mPushService == null) {
-            Intent intent = new Intent(mContext, PushService.class);
-            ComponentName componentName = mContext.startService(intent);
-            // 将flags设成0x0000，是因为设成其他时，当Service无人Bind时，会自动关闭
-            boolean ret = mContext.bindService(intent, mServiceConnection, 0x0000);
+            startPushService(mContext);
+        } else {
+            try {
+                mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -95,7 +105,11 @@ public class PushSdk {
     public synchronized void restartPushSdk() {
         log.info("restartPushSdk()");
         if (mPushService != null) {
-            mPushService.restartPushSdk();
+            try {
+                mPushService.restartPushSdk();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -105,7 +119,11 @@ public class PushSdk {
     public synchronized void stop() {
         log.info("stop()");
         if (mPushService != null) {
-            mPushService.stop();
+            try {
+                mPushService.stop();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
         if (mContext != null) {
             if (mServiceConnection != null) {
@@ -121,11 +139,15 @@ public class PushSdk {
      * @return 返回是否与push服务连接着
      */
     public synchronized boolean isConnected() {
+        boolean isConnected = false;
         if (mPushService != null) {
-            return mPushService.isConnected();
-        } else {
-            return false;
+            try {
+                isConnected = mPushService.isConnected();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
+        return isConnected;
     }
 
     /**
@@ -133,27 +155,27 @@ public class PushSdk {
      */
     public synchronized String getDeviceid() {
         if (mPushService != null) {
-            return mPushService.getDeviceid();
-        } else {
-            return null;
+            try {
+                 return mPushService.getDeviceid();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
+        return null;
     }
 
-    public synchronized void notifyClientConnectStatus(boolean isConnected) {
-        if (mPushService != null) {
-            mPushService.notifyClientConnectStatus(isConnected);
-        }
-    }
-
-    public synchronized void notifyDeviceToken(String deviceToken) {
-        if (mPushService != null) {
-            mPushService.notifyDeviceToken(deviceToken);
-        }
-    }
-
-    public synchronized void notifyPushMessage(long msgId, long msgTime, byte[] data) {
-        if (mPushService != null) {
-            mPushService.notifyPushMessage(msgId, msgTime, data);
+    /**
+     * 开始Push服務
+     *
+     * @param context      context
+     */
+    private synchronized void startPushService(final Context context) {
+        log.info("startPushService()");
+        mContext = context.getApplicationContext();
+        if (mPushService == null) {
+            Intent intent = new Intent(mContext, PushService.class);
+            ComponentName componentName = mContext.startService(intent);
+            boolean ret = mContext.bindService(intent, mServiceConnection, Context.BIND_IMPORTANT);
         }
     }
 
