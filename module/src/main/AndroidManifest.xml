@@ -26,6 +26,14 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </service>
+        <JobService
+            android:name="com.nd.adhoc.push.service.JobHandlerService"
+            android:process=":remoteJobHandlerService" >
+            <intent-filter>
+                <action android:name="com.nd.adhoc.push.service.JobHandlerService" />
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </JobService>
     </application>
 
 </manifest>

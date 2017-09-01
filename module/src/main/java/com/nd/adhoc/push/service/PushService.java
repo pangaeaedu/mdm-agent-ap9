@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -175,12 +176,19 @@ public class PushService extends Service {
 
     private void startDaemonService() {
         log.info("startDaemonService()");
-        Intent intentDaemon = new Intent();
-        intentDaemon.setClass(this, DaemonService.class);
-        ComponentName componentName = startService(intentDaemon);
-        log.info("startDaemonService() componentName = " + componentName);
-        boolean ret = bindService(intentDaemon, mDaemonServiceConnection, Context.BIND_IMPORTANT);
-        log.info("bindDaemonService() ret = " + ret);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Intent intentJobSchedule = new Intent(getApplicationContext(), JobHandlerService.class);
+            ComponentName componentName = startService(intentJobSchedule);
+            log.info("startDaemonService() start JobSchedule componentName = " + componentName);
+            boolean ret = bindService(intentJobSchedule, mDaemonServiceConnection, Context.BIND_IMPORTANT);
+            log.info("startDaemonService() bind JobSchedule ret = " + ret);
+        } else {
+            Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
+            ComponentName componentName = startService(intentDaemon);
+            log.info("startDaemonService() start DaemonService componentName = " + componentName);
+            boolean ret = bindService(intentDaemon, mDaemonServiceConnection, Context.BIND_IMPORTANT);
+            log.info("startDaemonService() bind DaemonService ret = " + ret);
+        }
     }
 
     /**

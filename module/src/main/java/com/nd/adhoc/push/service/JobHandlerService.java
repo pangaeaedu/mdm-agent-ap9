@@ -9,7 +9,13 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Build;
+import android.os.IBinder;
+import android.os.RemoteException;
+
+import com.nd.adhoc.push.PushSdk;
+import com.nd.sdp.adhoc.push.IDaemonService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +31,36 @@ public class JobHandlerService extends JobService {
     //每隔5秒运行一次
     private final static int Period_Time = 5000;
     private JobScheduler mJobScheduler;
+    private IDaemonService mDaemonService;
+
+    private ServiceConnection mDaemonServiceConnection  = new ServiceConnection() {
+        /**
+         * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
+         * 通过这个IBinder对象，实现宿主和Service的交互。
+         */
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            log.info("PushService mDaemonServiceConnection onServiceConnected()");
+            mDaemonService = IDaemonService.Stub.asInterface(binder);
+            if (mDaemonService != null) {
+                try {
+                    mDaemonService.startMonitorPushService();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        /**
+         * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
+         * 例如内存的资源不足时这个方法才被自动调用。
+         */
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            log.info("PushService mDaemonServiceConnection onServiceDisconnected()");
+            reStartService();
+        }
+    };
 
     public JobHandlerService() {
         super();
@@ -33,35 +69,21 @@ public class JobHandlerService extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         log.info("onStartJob");
-//        || isServiceRunning(this, "com.ph.myservice.RemoteService") == false
-//        if (!isServiceRunning(getApplicationContext(), "com.ph.myservice") || !isServiceRunning(getApplicationContext(), "com.ph.myservice:remote")) {
-//            startService(new Intent(this, LocalService.class));
-//            startService(new Intent(this, RemoteService.class));
-//        }
-
-       /* boolean serviceRunning = isServiceRunning(getApplicationContext(), "com.ph.myservice");
-        System.out.println("进程一" + serviceRunning);
-
-        boolean serviceRunning2 = isServiceRunning(getApplicationContext(), "com.ph.myservice:remote");
-        System.out.println("进程二" + serviceRunning2);*/
+        reStartService();
         return false;
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
-//        if (!isServiceRunning(this, "com.ph.myservice.LocalService") || !isServiceRunning(this, "com.ph.myservice.RemoteService")) {
-//            startService(new Intent(this, LocalService.class));
-//            startService(new Intent(this, RemoteService.class));
-//        }
+        log.info("onStopJob");
+        reStartService();
         return false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         log.info("onStartCommand");
-//        startService(new Intent(this, LocalService.class));
-//        startService(new Intent(this, RemoteService.class));
-
+        PushSdk.getInstance().startPushService(getApplicationContext());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
             JobInfo.Builder builder = new JobInfo.Builder(startId++,
@@ -84,8 +106,21 @@ public class JobHandlerService extends JobService {
         return START_STICKY;
     }
 
+    private void reStartService() {
+        log.info("startDaemonService()");
+        if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.PushService")) {
+            startService(new Intent(getApplicationContext(), PushService.class));
+        } else if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.DaemonService")) {
+            Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
+            ComponentName componentName = startService(intentDaemon);
+            log.info("startDaemonService() componentName = " + componentName);
+            boolean ret = bindService(intentDaemon, mDaemonServiceConnection, Context.BIND_IMPORTANT);
+            log.info("bindDaemonService() ret = " + ret);
+        }
+    }
+
     // 服务是否运行
-    public boolean isServiceRunning(Context context, String serviceName) {
+    private boolean isServiceRunning(Context context, String serviceName) {
         boolean isRunning = false;
         ActivityManager am = (ActivityManager) this
                 .getSystemService(Context.ACTIVITY_SERVICE);
