@@ -169,7 +169,7 @@ public class PushSdk {
      *
      * @param context      context
      */
-    public synchronized void startPushService(final Context context) {
+    private synchronized void startPushService(final Context context) {
         log.info("startPushService()");
         mContext = context.getApplicationContext();
         if (mPushService == null) {

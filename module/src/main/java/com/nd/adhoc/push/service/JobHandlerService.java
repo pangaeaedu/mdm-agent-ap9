@@ -83,7 +83,7 @@ public class JobHandlerService extends JobService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         log.info("onStartCommand");
-        PushSdk.getInstance().startPushService(getApplicationContext());
+        reStartService();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
             JobInfo.Builder builder = new JobInfo.Builder(startId++,

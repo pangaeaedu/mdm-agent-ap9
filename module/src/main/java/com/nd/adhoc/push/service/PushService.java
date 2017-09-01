@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -30,14 +29,8 @@ import java.lang.ref.WeakReference;
  * 此外，组件可以绑定到服务，以与之进行交互，甚至是执行进程间通信 (IPC)。
  * 例如，服务可以处理网络事务、播放音乐，执行文件 I/O 或与内容提供程序交互，而所有这一切均可在后台进行
  * <p>
- * PushService(Push服务)主要用來保證被启动后将在后台一直运行，即使启动服务的组件（Activity）已销毁也不受影响。
+ * PushService(Push服务)主要用來保證被启动后将在后台一直运行，即使启动服务的组件（Activity, Service）已销毁也不受影响。
  * 也尝试在该应用被强制删除后，自动唤起 。
- *
- * TODO : Service 中的 IBinder 方法未完, 目前的寫法有下列問題
- *         一. 跨進程通訊未實現 (aidl)
- *             1. 使用方如果使用非主線程方式調用, 有機率發生崩潰
- *             2. 如果將 Service 設成單獨線程, 會有崩潰機率
- *         二. 保活机制未完全實現
  */
 
 public class PushService extends Service {
