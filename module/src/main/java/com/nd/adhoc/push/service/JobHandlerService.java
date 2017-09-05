@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.nd.adhoc.push.PushSdk;
 import com.nd.sdp.adhoc.push.IDaemonService;
 
 import org.slf4j.Logger;
