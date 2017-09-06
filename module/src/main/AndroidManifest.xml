@@ -26,14 +26,15 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </service>
-        <JobService
+        <service
             android:name="com.nd.adhoc.push.service.JobHandlerService"
-            android:process=":remoteJobHandlerService" >
+            android:process=":remoteJobHandlerService"
+            android:permission="android.permission.BIND_JOB_SERVICE">
             <intent-filter>
                 <action android:name="com.nd.adhoc.push.service.JobHandlerService" />
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
-        </JobService>
+        </service>
     </application>
 
 </manifest>

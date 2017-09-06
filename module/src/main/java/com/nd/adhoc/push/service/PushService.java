@@ -173,8 +173,6 @@ public class PushService extends Service {
             Intent intentJobSchedule = new Intent(getApplicationContext(), JobHandlerService.class);
             ComponentName componentName = startService(intentJobSchedule);
             log.info("startDaemonService() start JobSchedule componentName = " + componentName);
-            boolean ret = bindService(intentJobSchedule, mDaemonServiceConnection, Context.BIND_IMPORTANT);
-            log.info("startDaemonService() bind JobSchedule ret = " + ret);
         } else {
             Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
             ComponentName componentName = startService(intentDaemon);

@@ -114,7 +114,23 @@ public class PushSdkModule {
         log.warn("restart push sdk , ip {}, port {}, appid {}, manufactorer {}, imei {}, mac {}, androidid {}",
                 mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId);
         doNotifyClientConnectStatus(false);
-        libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+        if (mIp == null || mIp.isEmpty()) {
+            log.warn("Ip is null");
+        } else if (mPort <= 0) {
+            log.warn("Port is wrong. Port = {}", mPort);
+        } else if (mAppid == null || mAppid.isEmpty()) {
+            log.warn("App id is null");
+        } else if (mManufactor == null || mManufactor.isEmpty()) {
+            log.warn("Manufactor is null");
+        } else if (mImei == null || mImei.isEmpty()) {
+            log.warn("Imei is null");
+        } else if (mMac == null || mMac.isEmpty()) {
+            log.warn("Mac is null");
+        } else if (mAndroidId == null || mAndroidId.isEmpty()) {
+            log.warn("AndroidId is null");
+        } else {
+            libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+        }
     }
 
     /**

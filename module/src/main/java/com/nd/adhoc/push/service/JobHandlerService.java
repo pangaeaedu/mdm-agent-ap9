@@ -28,7 +28,7 @@ import java.util.List;
 public class JobHandlerService extends JobService {
     private static Logger log = LoggerFactory.getLogger(JobHandlerService.class.getSimpleName());
     //每隔5秒运行一次
-    private final static int Period_Time = 5000;
+    private final static int Period_Time = 300000;
     private JobScheduler mJobScheduler;
     private IDaemonService mDaemonService;
 
@@ -106,15 +106,15 @@ public class JobHandlerService extends JobService {
     }
 
     private void reStartService() {
-        log.info("startDaemonService()");
+        log.info("reStartService()");
         if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.PushService")) {
             startService(new Intent(getApplicationContext(), PushService.class));
         } else if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.DaemonService")) {
             Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
             ComponentName componentName = startService(intentDaemon);
-            log.info("startDaemonService() componentName = " + componentName);
+            log.info("reStartService() componentName = " + componentName);
             boolean ret = bindService(intentDaemon, mDaemonServiceConnection, Context.BIND_IMPORTANT);
-            log.info("bindDaemonService() ret = " + ret);
+            log.info("reStartService() ret = " + ret);
         }
     }
 
