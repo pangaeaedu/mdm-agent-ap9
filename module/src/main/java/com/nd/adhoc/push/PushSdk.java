@@ -48,7 +48,7 @@ public class PushSdk {
                 try {
                     mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
                 } catch (RemoteException e) {
-                    e.printStackTrace();
+                    log.info("PushService mDaemonServiceConnection onServiceConnected exception {}", e.toString());
                 }
             }
         }
@@ -94,7 +94,7 @@ public class PushSdk {
             try {
                 mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                log.info("startPushSdk exception {}", e.toString());
             }
         }
     }
@@ -108,7 +108,7 @@ public class PushSdk {
             try {
                 mPushService.restartPushSdk();
             } catch (RemoteException e) {
-                e.printStackTrace();
+                log.info("restartPushSdk exception {}", e.toString());
             }
         }
     }
@@ -122,12 +122,16 @@ public class PushSdk {
             try {
                 mPushService.stop();
             } catch (RemoteException e) {
-                e.printStackTrace();
+                log.info("mPushService.stop() exception {}", e.toString());
             }
         }
         if (mContext != null) {
             if (mServiceConnection != null) {
-                mContext.unbindService(mServiceConnection);
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (Exception e) {
+                    log.info("mContext.unbindService exception {}", e.toString());
+                }
             }
             Intent intent = new Intent(mContext, PushService.class);
             mContext.startService(intent);
@@ -144,7 +148,7 @@ public class PushSdk {
             try {
                 isConnected = mPushService.isConnected();
             } catch (RemoteException e) {
-                e.printStackTrace();
+                log.info("isConnected exception {}", e.toString());
             }
         }
         return isConnected;
@@ -158,7 +162,7 @@ public class PushSdk {
             try {
                  return mPushService.getDeviceid();
             } catch (RemoteException e) {
-                e.printStackTrace();
+                log.info("getDeviceid exception {}", e.toString());
             }
         }
         return null;
