@@ -108,6 +108,16 @@ public class PushSdkModule {
     }
 
     /**
+     * 设置负载均衡服务
+     *
+     * @param host      负载均衡服务地址
+     * @param port      负载均衡服务端口
+     */
+    public void setLoadBalancer(String host, int port) {
+        libpushclient.native_pushSetLoadBalancer(host, port);
+    }
+
+    /**
      * 断开并重新连接push服务
      */
     public void restartPushSdk() {

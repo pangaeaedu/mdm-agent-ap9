@@ -20,6 +20,9 @@ public class libpushclient {
     // 初始化push， 日志等
     public static native void native_pushInit(String logPath);
 
+    // 设置负载均衡服务
+    public static native void native_pushSetLoadBalancer(String host, int port);
+
     // 开始接收Push消息
     public static native void native_pushLogin(String ip, int port, String appId, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
 
@@ -36,7 +39,7 @@ public class libpushclient {
         PushSdkModule.getInstance().notifyDeviceToken(deviceToken);
     }
 
-    public static void onPushMessage(String appId, long msgid, long msgTime, byte[] data) {
+    public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data) {
         PushSdkModule.getInstance().notifyPushMessage(msgid, msgTime, data);
     }
 

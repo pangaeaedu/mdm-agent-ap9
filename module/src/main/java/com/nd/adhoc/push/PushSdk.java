@@ -27,6 +27,10 @@ public class PushSdk {
 
     private String mAppid;
 
+    private String mLoadbanalcerHost = "";
+
+    private int mLoadbanalcerPort = 0;
+
     private IPushSdkCallback mPushCallback;
 
     /**
@@ -46,7 +50,7 @@ public class PushSdk {
             mPushService = IPushService.Stub.asInterface(binder);
             if (mPushService != null) {
                 try {
-                    mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
+                    mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
                 } catch (RemoteException e) {
                     log.info("PushService mDaemonServiceConnection onServiceConnected exception {}", e.toString());
                 }
@@ -72,6 +76,25 @@ public class PushSdk {
     }
 
     /**
+     * 设置负载均衡服务
+     *
+     * @param host      负载均衡服务地址
+     * @param port      负载均衡服务端口
+     */
+    public synchronized void setLoadBalancer(String host, int port) {
+        log.info("setLoadBalancer({} , {} ) ", host, port);
+        mLoadbanalcerHost = host;
+        mLoadbanalcerPort = port;
+        if (mPushService != null) {
+            try {
+                mPushService.setLoadbalancer(host, port);
+            } catch (RemoteException e) {
+                log.info("setLoadBalancer({} , {} ) , exception {}", host, port, e.toString());
+            }
+        }
+    }
+
+    /**
      * 开始接收Push消息
      *
      * @param context      context
@@ -92,7 +115,7 @@ public class PushSdk {
             startPushService(mContext);
         } else {
             try {
-                mPushService.startPushSdk(mAppid, mIp, mPort, mPushCallback);
+                mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
             } catch (RemoteException e) {
                 log.info("startPushSdk exception {}", e.toString());
             }

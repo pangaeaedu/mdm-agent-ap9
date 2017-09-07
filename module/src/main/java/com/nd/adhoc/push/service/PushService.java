@@ -132,8 +132,15 @@ public class PushService extends Service {
      */
     private IPushService.Stub mBinder = new IPushService.Stub() {
         WeakReference<PushService> mPushService = new WeakReference<PushService>(PushService.this);
+
         @Override
-        public void startPushSdk(String appid, String ip, int port, IPushSdkCallback pushCallback) throws RemoteException {
+        public void setLoadbalancer(String host, int port) throws RemoteException {
+            mPushService.get().setLoadBalancer(host, port);
+        }
+
+        @Override
+        public void startPushSdk(String appid, String loadbalancehost, int loadbalanceport, String ip, int port, IPushSdkCallback pushCallback) throws RemoteException {
+            mPushService.get().setLoadBalancer(loadbalancehost, loadbalanceport);
             mPushService.get().startPushSdk(appid, ip, port, pushCallback);
         }
 
@@ -192,6 +199,16 @@ public class PushService extends Service {
      */
     private void startPushSdk(String appid, String ip, int port, IPushSdkCallback pushCallback) {
         PushSdkModule.getInstance().startPushSdk(this, appid, ip, port, pushCallback);
+    }
+
+    /**
+     * 设置负载均衡服务
+     *
+     * @param host      负载均衡服务地址
+     * @param port      负载均衡服务端口
+     */
+    public void setLoadBalancer(String host, int port) {
+        PushSdkModule.getInstance().setLoadBalancer(host, port);
     }
 
     /**
