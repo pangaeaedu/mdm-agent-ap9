@@ -27,8 +27,8 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class JobHandlerService extends JobService {
     private static Logger log = LoggerFactory.getLogger(JobHandlerService.class.getSimpleName());
-    //每隔5秒运行一次
-    private final static int Period_Time = 300000;
+    //每隔10分鐘运行檢查一次
+    private final static int Period_Time = 600000;
     private JobScheduler mJobScheduler;
     private IDaemonService mDaemonService;
 
@@ -57,7 +57,7 @@ public class JobHandlerService extends JobService {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             log.info("PushService mDaemonServiceConnection onServiceDisconnected()");
-            reStartService();
+//            reStartService();
         }
     };
 
@@ -75,29 +75,29 @@ public class JobHandlerService extends JobService {
     @Override
     public boolean onStopJob(JobParameters params) {
         log.info("onStopJob");
-        reStartService();
         return false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         log.info("onStartCommand");
-        reStartService();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-            JobInfo.Builder builder = new JobInfo.Builder(startId++,
-                    new ComponentName(getPackageName(), JobHandlerService.class.getName()));
+            if (mJobScheduler == null) {
+                mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+                JobInfo.Builder builder = new JobInfo.Builder(startId++,
+                        new ComponentName(getPackageName(), JobHandlerService.class.getName()));
 
-            builder.setPeriodic(Period_Time);
-            builder.setRequiresCharging(true);
-            //设置设备重启后，是否重新执行任务
-            builder.setPersisted(true);
-            builder.setRequiresDeviceIdle(true);
+                builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+                builder.setPeriodic(Period_Time);
+                //设置设备重启后，是否重新执行任务
+                builder.setPersisted(true);
+                builder.setRequiresDeviceIdle(true);
 
-            if (mJobScheduler.schedule(builder.build()) <= 0) {
-                log.info("JobHandlerService work Success.");
-            } else {
-                log.info("JobHandlerService work Fail.");
+                if (mJobScheduler.schedule(builder.build()) == JobScheduler.RESULT_SUCCESS) {
+                    log.info("JobHandlerService work Success.");
+                } else {
+                    log.info("JobHandlerService work Fail.");
+                }
             }
         }
         // 如果Service被终止
@@ -105,17 +105,23 @@ public class JobHandlerService extends JobService {
         return START_STICKY;
     }
 
-    private void reStartService() {
-        log.info("reStartService()");
-        if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.PushService")) {
+    private boolean reStartService() {
+        boolean retService = false;
+        if (!isServiceRunning(getApplicationContext(), "com.nd.pad.eci.demo:remotePushService")) {
+            log.info("reStartService() com.nd.pad.eci.demo:remotePushService not Started.");
             startService(new Intent(getApplicationContext(), PushService.class));
-        } else if (!isServiceRunning(getApplicationContext(), "com.nd.adhoc.push.service.DaemonService")) {
+        } else if (!isServiceRunning(getApplicationContext(), "com.nd.pad.eci.demo:remoteDaemonService")) {
+            log.info("reStartService() com.nd.pad.eci.demo:remoteDaemonService not Started.");
             Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
             ComponentName componentName = startService(intentDaemon);
             log.info("reStartService() componentName = " + componentName);
             boolean ret = bindService(intentDaemon, mDaemonServiceConnection, Context.BIND_IMPORTANT);
             log.info("reStartService() ret = " + ret);
+        } else {
+            retService = true;
+            log.info("reStartService() all Started.");
         }
+        return retService;
     }
 
     // 服务是否运行
