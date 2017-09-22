@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.nd.adhoc.push.module.PushSdkModule;
-import com.nd.sdp.adhoc.push.IDaemonService;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.adhoc.push.IPushService;
 
@@ -35,7 +34,6 @@ import java.lang.ref.WeakReference;
 
 public class PushService extends Service {
     private static Logger log = LoggerFactory.getLogger(PushService.class.getSimpleName());
-    private IDaemonService mDaemonService;
 
     private ServiceConnection mDaemonServiceConnection  = new ServiceConnection() {
         /**
@@ -45,14 +43,6 @@ public class PushService extends Service {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             log.info("PushService mDaemonServiceConnection onServiceConnected()");
-            mDaemonService = IDaemonService.Stub.asInterface(binder);
-            if (mDaemonService != null) {
-                try {
-                    mDaemonService.startMonitorPushService();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         /**
@@ -86,8 +76,9 @@ public class PushService extends Service {
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(mReceiver);
         log.info("onDestroy()");
+        unregisterReceiver(mReceiver);
+        startDaemonService();
         super.onDestroy();
     }
 

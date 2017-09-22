@@ -12,9 +12,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
-
-import com.nd.sdp.adhoc.push.IDaemonService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +24,9 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class JobHandlerService extends JobService {
     private static Logger log = LoggerFactory.getLogger(JobHandlerService.class.getSimpleName());
-    //每隔10分鐘运行檢查一次
-    private final static int Period_Time = 600000;
+    //每隔1分鐘运行檢查一次
+    private final static int Period_Time = 60000;
     private JobScheduler mJobScheduler;
-    private IDaemonService mDaemonService;
 
     private ServiceConnection mDaemonServiceConnection  = new ServiceConnection() {
         /**
@@ -39,15 +35,7 @@ public class JobHandlerService extends JobService {
          */
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            log.info("PushService mDaemonServiceConnection onServiceConnected()");
-            mDaemonService = IDaemonService.Stub.asInterface(binder);
-            if (mDaemonService != null) {
-                try {
-                    mDaemonService.startMonitorPushService();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
+            log.info("JobHandlerService mDaemonServiceConnection onServiceConnected()");
         }
 
         /**
@@ -56,13 +44,19 @@ public class JobHandlerService extends JobService {
          */
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            log.info("PushService mDaemonServiceConnection onServiceDisconnected()");
-//            reStartService();
+            log.info("JobHandlerService mDaemonServiceConnection onServiceDisconnected()");
+            reStartService();
         }
     };
 
     public JobHandlerService() {
         super();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        log.info("onCreate");
     }
 
     @Override
@@ -75,6 +69,7 @@ public class JobHandlerService extends JobService {
     @Override
     public boolean onStopJob(JobParameters params) {
         log.info("onStopJob");
+        reStartService();
         return false;
     }
 
@@ -99,10 +94,48 @@ public class JobHandlerService extends JobService {
                     log.info("JobHandlerService work Fail.");
                 }
             }
+            reStartService();
         }
         // 如果Service被终止
         // 当资源允许情况下，重启service
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        log.info("onDestroy");
+        reStartService();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        log.info("onLowMemory");
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        log.info("onTrimMemory : level = " + level);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        log.info("onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        log.info("onRebind");
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        log.info("onTaskRemoved");
     }
 
     private boolean reStartService() {
@@ -139,7 +172,5 @@ public class JobHandlerService extends JobService {
             }
         }
         return isRunning;
-
     }
-
 }

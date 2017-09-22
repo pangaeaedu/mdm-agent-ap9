@@ -8,13 +8,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.nd.sdp.adhoc.push.IDaemonService;
 import com.nd.sdp.adhoc.push.IPushService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Created by XWQ on 2017/8/31 0031.
@@ -33,6 +30,7 @@ public class DaemonService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         log.info("DaemonService onStartCommand()");
+        startMonitorPushService();
         // 如果Service被终止
         // 当资源允许情况下，重启service
         return START_STICKY;
@@ -40,8 +38,9 @@ public class DaemonService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         log.info("DaemonService onDestroy()");
+        startMonitorPushService();
+        super.onDestroy();
     }
 
     @Override
@@ -59,7 +58,7 @@ public class DaemonService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         log.info("DaemonService onBind()");
-        return mBinder;
+        return null;
     }
 
     @Override
@@ -109,15 +108,6 @@ public class DaemonService extends Service {
             log.info("DaemonService ServiceConnection onServiceDisconnected() ComponentName = " + name);
             mPushService = null;
             startMonitorPushService();
-        }
-    };
-
-    private IDaemonService.Stub mBinder = new IDaemonService.Stub() {
-        WeakReference<DaemonService> mDaemonService = new WeakReference<DaemonService>(DaemonService.this);
-
-        @Override
-        public void startMonitorPushService() throws RemoteException {
-            mDaemonService.get().startMonitorPushService();
         }
     };
 
