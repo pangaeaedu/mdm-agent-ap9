@@ -24,8 +24,8 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class JobHandlerService extends JobService {
     private static Logger log = LoggerFactory.getLogger(JobHandlerService.class.getSimpleName());
-    //每隔1分鐘运行檢查一次
-    private final static int Period_Time = 60000;
+    //每隔10分鐘运行檢查一次
+    private final static int Period_Time = 600000;
     private JobScheduler mJobScheduler;
 
     private ServiceConnection mDaemonServiceConnection  = new ServiceConnection() {
