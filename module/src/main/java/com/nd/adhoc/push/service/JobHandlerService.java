@@ -140,11 +140,11 @@ public class JobHandlerService extends JobService {
 
     private boolean reStartService() {
         boolean retService = false;
-        if (!isServiceRunning(getApplicationContext(), "com.nd.pad.eci.demo:remotePushService")) {
-            log.info("reStartService() com.nd.pad.eci.demo:remotePushService not Started.");
+        if (!isServiceRunning(getApplicationContext(), ":remotePushService")) {
+            log.info("reStartService() :remotePushService not Started.");
             startService(new Intent(getApplicationContext(), PushService.class));
-        } else if (!isServiceRunning(getApplicationContext(), "com.nd.pad.eci.demo:remoteDaemonService")) {
-            log.info("reStartService() com.nd.pad.eci.demo:remoteDaemonService not Started.");
+        } else if (!isServiceRunning(getApplicationContext(), ":remoteDaemonService")) {
+            log.info("reStartService() :remoteDaemonService not Started.");
             Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
             ComponentName componentName = startService(intentDaemon);
             log.info("reStartService() componentName = " + componentName);
@@ -167,7 +167,7 @@ public class JobHandlerService extends JobService {
 
         for (ActivityManager.RunningAppProcessInfo info : lists) {// 获取运行服务再启动
             System.out.println(info.processName);
-            if (info.processName.equals(serviceName)) {
+            if (info.processName.contains(serviceName)) {
                 isRunning = true;
             }
         }
