@@ -16,8 +16,7 @@ import com.nd.adhoc.push.module.PushSdkModule;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.adhoc.push.IPushService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.lang.ref.WeakReference;
 
@@ -33,7 +32,7 @@ import java.lang.ref.WeakReference;
  */
 
 public class PushService extends Service {
-    private static Logger log = LoggerFactory.getLogger(PushService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PushService.class.getSimpleName());
 
     private ServiceConnection mDaemonServiceConnection  = new ServiceConnection() {
         /**
@@ -91,7 +90,7 @@ public class PushService extends Service {
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        log.info("onTrimMemory() level {} ", level);
+        log.info("onTrimMemory() level = " + level);
     }
 
     @Override

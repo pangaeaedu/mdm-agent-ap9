@@ -13,8 +13,7 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ import java.util.List;
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class JobHandlerService extends JobService {
-    private static Logger log = LoggerFactory.getLogger(JobHandlerService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(JobHandlerService.class.getSimpleName());
     //每隔10分鐘运行檢查一次
     private final static int Period_Time = 600000;
     private JobScheduler mJobScheduler;
