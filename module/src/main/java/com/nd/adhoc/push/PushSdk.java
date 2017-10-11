@@ -4,7 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 
 import com.nd.adhoc.push.service.PushService;
@@ -19,6 +21,8 @@ public class PushSdk {
 
     private static Logger log = Logger.getLogger(PushSdk.class.getSimpleName());
 
+    private static final int START_PUSH_SDK = 0;
+
     private Context mContext;
 
     private String mIp;
@@ -32,6 +36,25 @@ public class PushSdk {
     private int mLoadbanalcerPort = 0;
 
     private IPushSdkCallback mPushCallback;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case START_PUSH_SDK:
+                    if (mPushService != null) {
+                        try {
+                            mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
+                        } catch (RemoteException e) {
+                            log.info("PushService exception = " + e.toString());
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     /**
      * ServiceConnection代表与服务的连接，它只有两个方法，
@@ -48,13 +71,8 @@ public class PushSdk {
             log.info("PushSdk mServiceConnection onServiceConnected()");
             // 获取Binder
             mPushService = IPushService.Stub.asInterface(binder);
-            if (mPushService != null) {
-                try {
-                    mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
-                } catch (RemoteException e) {
-                    log.info("PushService mDaemonServiceConnection onServiceConnected exception = " + e.toString());
-                }
-            }
+            mHandler.removeMessages(START_PUSH_SDK);
+            mHandler.sendEmptyMessage(START_PUSH_SDK);
         }
 
         /**
