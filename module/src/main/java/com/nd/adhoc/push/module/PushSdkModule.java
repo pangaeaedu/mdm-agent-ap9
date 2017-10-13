@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by XWQ on 2017/8/29 0029.
@@ -198,7 +199,7 @@ public class PushSdkModule {
         }
     }
 
-    public void notifyPushMessage(long msgId, long msgTime, byte[] data) {
+    public void notifyPushMessage(long msgId, long msgTime, byte[] data, HashMap<String,String> extraFields) {
         if (mPushCallback != null) {
             try {
                 mPushCallback.onPushMessage(mAppid, data);

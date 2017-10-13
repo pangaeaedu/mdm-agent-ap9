@@ -2,6 +2,8 @@ package com.nd.adhoc.push.client;
 
 import com.nd.adhoc.push.module.PushSdkModule;
 
+import java.util.HashMap;
+
 public class libpushclient {
 
     static {
@@ -39,8 +41,12 @@ public class libpushclient {
         PushSdkModule.getInstance().notifyDeviceToken(deviceToken);
     }
 
-    public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data) {
-        PushSdkModule.getInstance().notifyPushMessage(msgid, msgTime, data);
+    public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data, String []extraKeys, String []extarValues) {
+        HashMap<String,String> extraFields = new HashMap<>();
+        for (int i=0; i<extraKeys.length; ++i) {
+            extraFields.put(extraKeys[i], extarValues[i]);
+        }
+        PushSdkModule.getInstance().notifyPushMessage(msgid, msgTime, data, extraFields);
     }
 
     public static void onPushLoginResult(String appId, int errCode, String errMsg) {
