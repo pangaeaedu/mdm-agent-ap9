@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
@@ -37,24 +38,59 @@ public class PushSdk {
 
     private IPushSdkCallback mPushCallback;
 
+    private HandlerThread mHandlerThread ;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case START_PUSH_SDK:
-                    if (mPushService != null) {
-                        try {
-                            mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
-                        } catch (RemoteException e) {
-                            log.info("PushService exception = " + e.toString());
-                        }
-                    }
+                    startPushService();
                     break;
                 default:
                     break;
             }
         }
     };
+
+    public PushSdk () {
+        //创建一个线程,线程名字：handler-thread
+        mHandlerThread = new HandlerThread( "handler-thread");
+        //开启一个线程
+        mHandlerThread.start();
+        //在这个线程中创建一个handler对象
+        mHandler = new Handler(mHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case START_PUSH_SDK:
+                        startPushService();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        //释放资源
+        mHandlerThread.quit() ;
+        super.finalize();
+    }
+
+    private synchronized void startPushService() {
+        log.info("startPushService()");
+        if (mPushService != null) {
+            try {
+                mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
+            } catch (RemoteException e) {
+                log.info("PushService exception = " + e.toString());
+            }
+        }
+    }
 
     /**
      * ServiceConnection代表与服务的连接，它只有两个方法，
@@ -132,11 +168,8 @@ public class PushSdk {
         if (mPushService == null) {
             startPushService(mContext);
         } else {
-            try {
-                mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
-            } catch (RemoteException e) {
-                log.info("startPushSdk exception = " + e.toString());
-            }
+            mHandler.removeMessages(START_PUSH_SDK);
+            mHandler.sendEmptyMessage(START_PUSH_SDK);
         }
     }
 
