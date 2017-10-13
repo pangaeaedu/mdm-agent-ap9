@@ -10,15 +10,15 @@ import android.os.RemoteException;
 
 import com.nd.sdp.adhoc.push.IPushService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 /**
  * Created by XWQ on 2017/8/31 0031.
  */
 
 public class DaemonService extends Service {
-    private static Logger log = LoggerFactory.getLogger(PushService.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PushService.class.getSimpleName());
     private IPushService mPushService;
 
     @Override
@@ -52,7 +52,7 @@ public class DaemonService extends Service {
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        log.info("DaemonService onLowMemory() level = {}", level);
+        log.info("DaemonService onLowMemory() level = " + level);
     }
 
     @Override

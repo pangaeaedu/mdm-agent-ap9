@@ -7,8 +7,7 @@ import com.nd.adhoc.push.client.libpushclient;
 import com.nd.adhoc.push.util.DeviceUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -18,7 +17,7 @@ import java.util.HashMap;
  */
 
 public class PushSdkModule {
-    private static Logger log = LoggerFactory.getLogger(PushSdkModule.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PushSdkModule.class.getSimpleName());
     private static PushSdkModule instance = new PushSdkModule();
 
     private String mIp;
@@ -84,8 +83,14 @@ public class PushSdkModule {
             mMac = DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
         }
-        log.warn("start push sdk , ip {}, port {}, appid {}, manufactorer {}, imei {}, mac {}, androidid {}",
-                ip, port, appid, mManufactor, mImei, mMac, mAndroidId);
+        log.warn("start push sdk" +
+                 " , ip = " + ip +
+                 " , port = " + port +
+                 " , appid = " + appid +
+                 " , manufactorer = " + mManufactor +
+                 " , imei = " + mImei +
+                 " , mac = " + mMac +
+                 " , androidid = " + mAndroidId);
         mIp = ip;
         mPort = port;
         mAppid = appid;
@@ -122,13 +127,19 @@ public class PushSdkModule {
      * 断开并重新连接push服务
      */
     public void restartPushSdk() {
-        log.warn("restart push sdk , ip {}, port {}, appid {}, manufactorer {}, imei {}, mac {}, androidid {}",
-                mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId);
+        log.warn("restart push sdk" +
+                " , ip = " + mIp +
+                " , port = " + mPort +
+                " , appid = " + mAppid +
+                " , manufactorer = " + mManufactor +
+                " , imei = " + mImei +
+                " , mac = " + mMac +
+                " , androidid = " + mAndroidId);
         doNotifyClientConnectStatus(false);
         if (mIp == null || mIp.isEmpty()) {
             log.warn("Ip is null");
         } else if (mPort <= 0) {
-            log.warn("Port is wrong. Port = {}", mPort);
+            log.warn("Port is wrong. Port = " + mPort);
         } else if (mAppid == null || mAppid.isEmpty()) {
             log.warn("App id is null");
         } else if (mManufactor == null || mManufactor.isEmpty()) {
@@ -171,7 +182,9 @@ public class PushSdkModule {
     }
 
     private void doNotifyClientConnectStatus(boolean isConnected) {
-        log.warn("doNotifyClientConnectStatus , currentStatus {} , newStatus {}", mIsConnected, isConnected);
+        log.warn("doNotifyClientConnectStatus" +
+                 " , currentStatus = " + mIsConnected +
+                 " , newStatus  = " +isConnected);
         if (isConnected != mIsConnected || mIsFirst) {
             mIsFirst = false;
             mIsConnected = isConnected;
@@ -187,7 +200,7 @@ public class PushSdkModule {
     }
 
     public void notifyDeviceToken(String deviceToken) {
-        log.info("notifyDeviceToken {}", deviceToken);
+        log.info("notifyDeviceToken deviceToken = " + deviceToken);
         mDevicetoken = deviceToken;
         if (mPushCallback != null) {
             try {

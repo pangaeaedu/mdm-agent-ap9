@@ -4,20 +4,24 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 
 import com.nd.adhoc.push.service.PushService;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.adhoc.push.IPushService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
+
 
 public class PushSdk {
     private static PushSdk instance = new PushSdk();
 
-    private static Logger log = LoggerFactory.getLogger(PushSdk.class.getSimpleName());
+    private static Logger log = Logger.getLogger(PushSdk.class.getSimpleName());
+
+    private static final int START_PUSH_SDK = 0;
 
     private Context mContext;
 
@@ -32,6 +36,25 @@ public class PushSdk {
     private int mLoadbanalcerPort = 0;
 
     private IPushSdkCallback mPushCallback;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case START_PUSH_SDK:
+                    if (mPushService != null) {
+                        try {
+                            mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
+                        } catch (RemoteException e) {
+                            log.info("PushService exception = " + e.toString());
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     /**
      * ServiceConnection代表与服务的连接，它只有两个方法，
@@ -48,13 +71,8 @@ public class PushSdk {
             log.info("PushSdk mServiceConnection onServiceConnected()");
             // 获取Binder
             mPushService = IPushService.Stub.asInterface(binder);
-            if (mPushService != null) {
-                try {
-                    mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
-                } catch (RemoteException e) {
-                    log.info("PushService mDaemonServiceConnection onServiceConnected exception {}", e.toString());
-                }
-            }
+            mHandler.removeMessages(START_PUSH_SDK);
+            mHandler.sendEmptyMessage(START_PUSH_SDK);
         }
 
         /**
@@ -82,14 +100,14 @@ public class PushSdk {
      * @param port      负载均衡服务端口
      */
     public synchronized void setLoadBalancer(String host, int port) {
-        log.info("setLoadBalancer({} , {} ) ", host, port);
+        log.info("setLoadBalancer( "+ host + " , " + port + " ) ");
         mLoadbanalcerHost = host;
         mLoadbanalcerPort = port;
         if (mPushService != null) {
             try {
                 mPushService.setLoadbalancer(host, port);
             } catch (RemoteException e) {
-                log.info("setLoadBalancer({} , {} ) , exception {}", host, port, e.toString());
+                log.info("setLoadBalancer( "+ host + " , " + port + " ) " + " , exception = " + e.toString() );
             }
         }
     }
@@ -117,7 +135,7 @@ public class PushSdk {
             try {
                 mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
             } catch (RemoteException e) {
-                log.info("startPushSdk exception {}", e.toString());
+                log.info("startPushSdk exception = " + e.toString());
             }
         }
     }
@@ -131,7 +149,7 @@ public class PushSdk {
             try {
                 mPushService.restartPushSdk();
             } catch (RemoteException e) {
-                log.info("restartPushSdk exception {}", e.toString());
+                log.info("restartPushSdk exception = " + e.toString());
             }
         }
     }
@@ -145,7 +163,7 @@ public class PushSdk {
             try {
                 mPushService.stop();
             } catch (RemoteException e) {
-                log.info("mPushService.stop() exception {}", e.toString());
+                log.info("mPushService.stop() exception = " + e.toString());
             }
         }
         if (mContext != null) {
@@ -153,7 +171,7 @@ public class PushSdk {
                 try {
                     mContext.unbindService(mServiceConnection);
                 } catch (Exception e) {
-                    log.info("mContext.unbindService exception {}", e.toString());
+                    log.info("mContext.unbindService exception = " + e.toString());
                 }
             }
             Intent intent = new Intent(mContext, PushService.class);
@@ -171,7 +189,7 @@ public class PushSdk {
             try {
                 isConnected = mPushService.isConnected();
             } catch (RemoteException e) {
-                log.info("isConnected exception {}", e.toString());
+                log.info("isConnected exception = " + e.toString());
             }
         }
         return isConnected;
@@ -185,7 +203,7 @@ public class PushSdk {
             try {
                  return mPushService.getDeviceid();
             } catch (RemoteException e) {
-                log.info("getDeviceid exception {}", e.toString());
+                log.info("getDeviceid exception = " + e.toString());
             }
         }
         return null;
