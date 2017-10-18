@@ -18,7 +18,7 @@ interface IPushSdkCallback {
      * @param content
      * @return
      */
-    byte[] onPushMessage(String appid, inout byte[] content);
+    byte[] onPushMessage(String appid, inout byte[] content, inout String[] extraKeys, inout String[] extraValues);
 
     /**
      * 客户端与push服务器连接状态回调
