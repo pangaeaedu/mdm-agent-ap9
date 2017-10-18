@@ -42,11 +42,7 @@ public class libpushclient {
     }
 
     public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data, String []extraKeys, String []extarValues) {
-        HashMap<String,String> extraFields = new HashMap<>();
-        for (int i=0; i<extraKeys.length; ++i) {
-            extraFields.put(extraKeys[i], extarValues[i]);
-        }
-        PushSdkModule.getInstance().notifyPushMessage(msgid, msgTime, data, extraFields);
+        PushSdkModule.getInstance().notifyPushMessage(appId, msgtype, contenttype, msgid, msgTime, data, extraKeys, extarValues);
     }
 
     public static void onPushLoginResult(String appId, int errCode, String errMsg) {

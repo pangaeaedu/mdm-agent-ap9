@@ -212,19 +212,10 @@ public class PushSdkModule {
         }
     }
 
-    public void notifyPushMessage(long msgId, long msgTime, byte[] data, HashMap<String, String> extraFields) {
-
+    public void notifyPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data, String []extraKeys, String []extraValues)  {
         if (mPushCallback != null) {
-            int size = extraFields.size();
-            String[] extraKeys = new String[size];
-            String[] extraValues = new String[size];
-            int i = 0;
-            for (HashMap.Entry<String, String> entry:extraFields.entrySet()) {
-                extraKeys[i++] = entry.getKey();
-                extraValues[i++] = entry.getValue();
-            }
             try {
-                mPushCallback.onPushMessage(mAppid, data, extraKeys, extraValues);
+                mPushCallback.onPushMessage(mAppid, msgtype, contenttype, msgid, msgTime, data, extraKeys, extraValues);
             } catch (Exception e) {
                 mPushCallback = null;
                 e.printStackTrace();
