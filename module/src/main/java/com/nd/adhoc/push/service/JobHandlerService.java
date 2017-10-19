@@ -139,11 +139,11 @@ public class JobHandlerService extends JobService {
 
     private boolean reStartService() {
         boolean retService = false;
-        if (!isServiceRunning(getApplicationContext(), ":remotePushService")) {
-            log.info("reStartService() :remotePushService not Started.");
+        if (!isServiceRunning(getApplicationContext(), ":remotePush_startalone")) {
+            log.info("reStartService() :remotePush_startalone not Started.");
             startService(new Intent(getApplicationContext(), PushService.class));
-        } else if (!isServiceRunning(getApplicationContext(), ":remoteDaemonService")) {
-            log.info("reStartService() :remoteDaemonService not Started.");
+        } else if (!isServiceRunning(getApplicationContext(), ":remoteDaemon_startalone")) {
+            log.info("reStartService() :remoteDaemon_startalone not Started.");
             Intent intentDaemon = new Intent(getApplicationContext(), DaemonService.class);
             ComponentName componentName = startService(intentDaemon);
             log.info("reStartService() componentName = " + componentName);

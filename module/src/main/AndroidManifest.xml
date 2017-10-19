@@ -13,7 +13,7 @@
     <application>
         <service
             android:name="com.nd.adhoc.push.service.PushService"
-            android:process=":remotePushService">
+            android:process=":remotePush_startalone">
             <intent-filter>
                 <action android:name="com.nd.adhoc.push.service.PushService" />
                 <action android:name="android.intent.action.MAIN" />
@@ -21,7 +21,7 @@
         </service>
         <service
             android:name="com.nd.adhoc.push.service.DaemonService"
-            android:process=":remoteDaemonService" >
+            android:process=":remoteDaemon_startalone" >
             <intent-filter>
                 <action android:name="com.nd.adhoc.push.service.DaemonService" />
                 <action android:name="android.intent.action.MAIN" />
@@ -29,7 +29,7 @@
         </service>
         <service
             android:name="com.nd.adhoc.push.service.JobHandlerService"
-            android:process=":remoteJobHandlerService"
+            android:process=":remoteJobHandler_startalone"
             android:permission="android.permission.BIND_JOB_SERVICE">
             <intent-filter>
                 <action android:name="com.nd.adhoc.push.service.JobHandlerService" />
