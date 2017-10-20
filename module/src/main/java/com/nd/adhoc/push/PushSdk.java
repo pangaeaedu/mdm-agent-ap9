@@ -40,18 +40,7 @@ public class PushSdk {
 
     private HandlerThread mHandlerThread ;
 
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case START_PUSH_SDK:
-                    startPushService();
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
+    private Handler mHandler;
 
     public PushSdk () {
         //创建一个线程,线程名字：handler-thread
