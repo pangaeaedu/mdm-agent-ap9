@@ -16,6 +16,8 @@ import com.nd.sdp.adhoc.push.IPushService;
 
 import org.apache.log4j.Logger;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 public class PushSdk {
     private static PushSdk instance = new PushSdk();
@@ -23,6 +25,7 @@ public class PushSdk {
     private static Logger log = Logger.getLogger(PushSdk.class.getSimpleName());
 
     private static final int START_PUSH_SDK = 0;
+    private static final int STOP_PUSH_SDK = 1;
 
     private Context mContext;
 
@@ -42,6 +45,8 @@ public class PushSdk {
 
     private Handler mHandler;
 
+    private AtomicBoolean mIsInit = new AtomicBoolean(false);
+
     public PushSdk () {
         //创建一个线程,线程名字：handler-thread
         mHandlerThread = new HandlerThread( "handler-thread");
@@ -54,7 +59,12 @@ public class PushSdk {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case START_PUSH_SDK:
-                        startPushService();
+                        startPushServiceInThread();
+                        mIsInit.set(true);
+                        break;
+                    case STOP_PUSH_SDK:
+                        mIsInit.set(false);
+                        stopPushServiceInThread();
                         break;
                     default:
                         break;
@@ -70,8 +80,8 @@ public class PushSdk {
         super.finalize();
     }
 
-    private synchronized void startPushService() {
-        log.info("startPushService()");
+    private synchronized void startPushServiceInThread() {
+        log.info("startPushServiceInThread()");
         if (mPushService != null) {
             try {
                 mPushService.startPushSdk(mAppid, mLoadbanalcerHost, mLoadbanalcerPort, mIp, mPort, mPushCallback);
@@ -79,6 +89,27 @@ public class PushSdk {
                 log.info("PushService exception = " + e.toString());
             }
         }
+    }
+
+    private synchronized void stopPushServiceInThread() {
+        log.info("stopPushServiceInThread()");
+        if (mPushService != null) {
+            try {
+                mPushService.stop();
+            } catch (RemoteException e) {
+                log.info("mPushService.stop() exception = " + e.toString());
+            }
+        }
+        if (mContext != null) {
+            if (mServiceConnection != null) {
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (Exception e) {
+                    log.info("mContext.unbindService exception = " + e.toString());
+                }
+            }
+        }
+        mPushService = null;
     }
 
     /**
@@ -96,7 +127,6 @@ public class PushSdk {
             log.info("PushSdk mServiceConnection onServiceConnected()");
             // 获取Binder
             mPushService = IPushService.Stub.asInterface(binder);
-            mHandler.removeMessages(START_PUSH_SDK);
             mHandler.sendEmptyMessage(START_PUSH_SDK);
         }
 
@@ -107,8 +137,18 @@ public class PushSdk {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             log.info("PushSdk mServiceConnection onServiceDisconnected()");
+            mIsInit.set(false);
             mPushService = null;
-            startPushService(mContext);
+            boolean isNotifySuccess = false;
+            try {
+                mPushCallback.onPushShutdown();
+                isNotifySuccess = true;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            if (mContext != null && isNotifySuccess == false) {
+                startPushService(mContext);
+            }
         }
     };
 
@@ -181,33 +221,15 @@ public class PushSdk {
      */
     public synchronized void stop() {
         log.info("stop()");
-        if (mPushService != null) {
-            try {
-                mPushService.stop();
-            } catch (RemoteException e) {
-                log.info("mPushService.stop() exception = " + e.toString());
-            }
-        }
-        if (mContext != null) {
-            if (mServiceConnection != null) {
-                try {
-                    mContext.unbindService(mServiceConnection);
-                } catch (Exception e) {
-                    log.info("mContext.unbindService exception = " + e.toString());
-                }
-            }
-            Intent intent = new Intent(mContext, PushService.class);
-            mContext.startService(intent);
-        }
-        mPushService = null;
+        mHandler.sendEmptyMessage(STOP_PUSH_SDK);
     }
 
     /**
      * @return 返回是否与push服务连接着
      */
-    public synchronized boolean isConnected() {
+    public boolean isConnected() {
         boolean isConnected = false;
-        if (mPushService != null) {
+        if (mIsInit.get() == true && mPushService != null) {
             try {
                 isConnected = mPushService.isConnected();
             } catch (RemoteException e) {
@@ -220,8 +242,8 @@ public class PushSdk {
     /**
      * @return 返回deviceId
      */
-    public synchronized String getDeviceid() {
-        if (mPushService != null) {
+    public String getDeviceid() {
+        if (mIsInit.get() == true && mPushService != null) {
             try {
                  return mPushService.getDeviceid();
             } catch (RemoteException e) {
