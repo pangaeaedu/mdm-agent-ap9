@@ -26,8 +26,7 @@ public class PushSdk {
 
     private static final int START_PUSH_PROCESS = 0;
     private static final int START_PUSH_SDK = 1;
-    private static final int STOP_PUSH_SDK = 2;
-    private static final int RESTART_PUSH_SDK = 3;
+    private static final int RESTART_PUSH_SDK = 2;
 
     private Context mContext;
 
@@ -67,10 +66,6 @@ public class PushSdk {
                         startPushServiceInThread();
                         mIsInit.set(true);
                         break;
-                    case STOP_PUSH_SDK:
-                        mIsInit.set(false);
-                        stopPushServiceInThread();
-                        break;
                     case RESTART_PUSH_SDK:
                         restartPushSdkInThread();
                         break;
@@ -79,13 +74,6 @@ public class PushSdk {
                 }
             }
         };
-    }
-
-    private void removeAllMessage() {
-        mHandler.removeMessages(START_PUSH_PROCESS);
-        mHandler.removeMessages(START_PUSH_SDK);
-        mHandler.removeMessages(STOP_PUSH_SDK);
-        mHandler.removeMessages(RESTART_PUSH_SDK);
     }
 
     @Override
@@ -104,27 +92,6 @@ public class PushSdk {
                 log.info("PushService exception = " + e.toString());
             }
         }
-    }
-
-    private synchronized void stopPushServiceInThread() {
-        log.info("stopPushServiceInThread()");
-        if (mPushService != null) {
-            try {
-                mPushService.stop();
-            } catch (RemoteException e) {
-                log.info("mPushService.stop() exception = " + e.toString());
-            }
-        }
-        if (mContext != null) {
-            if (mServiceConnection != null) {
-                try {
-                    mContext.unbindService(mServiceConnection);
-                } catch (Exception e) {
-                    log.info("mContext.unbindService exception = " + e.toString());
-                }
-            }
-        }
-        mPushService = null;
     }
 
     /**
@@ -210,7 +177,6 @@ public class PushSdk {
         mAppid = appid;
         mPushCallback = pushCallback;
 
-
         if (mPushService == null) {
             mHandler.removeMessages(START_PUSH_PROCESS);
             mHandler.sendEmptyMessage(START_PUSH_PROCESS);
@@ -245,8 +211,24 @@ public class PushSdk {
      */
     public synchronized void stop() {
         log.info("stop()");
-        mHandler.removeMessages(STOP_PUSH_SDK);
-        mHandler.sendEmptyMessage(STOP_PUSH_SDK);
+        mIsInit.set(false);
+        if (mPushService != null) {
+            try {
+                mPushService.stop();
+            } catch (RemoteException e) {
+                log.info("mPushService.stop() exception = " + e.toString());
+            }
+        }
+        if (mContext != null) {
+            if (mServiceConnection != null) {
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (Exception e) {
+                    log.info("mContext.unbindService exception = " + e.toString());
+                }
+            }
+        }
+        mPushService = null;
     }
 
     /**

@@ -159,7 +159,6 @@ public class PushSdkModule {
      * 停止接收push消息
      */
     public void stop() {
-        mPushCallback = null;
         libpushclient.native_pushDisconnect();
     }
 
@@ -192,7 +191,6 @@ public class PushSdkModule {
                 try {
                     mPushCallback.onPushStatus(isConnected);
                 } catch (Exception e) {
-                    mPushCallback = null;
                     e.printStackTrace();
                 }
             }
@@ -204,9 +202,8 @@ public class PushSdkModule {
         mDevicetoken = deviceToken;
         if (mPushCallback != null) {
             try {
-                mPushCallback.onPushDeviceToken(deviceToken);
+                mPushCallback.onPushDeviceToken(mDevicetoken);
             } catch (Exception e) {
-                mPushCallback = null;
                 e.printStackTrace();
             }
         }
@@ -217,7 +214,6 @@ public class PushSdkModule {
             try {
                 mPushCallback.onPushMessage(mAppid, msgtype, contenttype, msgid, msgTime, data, extraKeys, extraValues);
             } catch (Exception e) {
-                mPushCallback = null;
                 e.printStackTrace();
             }
         }
