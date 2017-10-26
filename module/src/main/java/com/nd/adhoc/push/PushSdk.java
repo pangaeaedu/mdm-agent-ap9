@@ -24,8 +24,10 @@ public class PushSdk {
 
     private static Logger log = Logger.getLogger(PushSdk.class.getSimpleName());
 
-    private static final int START_PUSH_SDK = 0;
-    private static final int STOP_PUSH_SDK = 1;
+    private static final int START_PUSH_PROCESS = 0;
+    private static final int START_PUSH_SDK = 1;
+    private static final int STOP_PUSH_SDK = 2;
+    private static final int RESTART_PUSH_SDK = 3;
 
     private Context mContext;
 
@@ -58,6 +60,9 @@ public class PushSdk {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 switch (msg.what) {
+                    case START_PUSH_PROCESS:
+                        startPushService(mContext);
+                        break;
                     case START_PUSH_SDK:
                         startPushServiceInThread();
                         mIsInit.set(true);
@@ -66,11 +71,21 @@ public class PushSdk {
                         mIsInit.set(false);
                         stopPushServiceInThread();
                         break;
+                    case RESTART_PUSH_SDK:
+                        restartPushSdkInThread();
+                        break;
                     default:
                         break;
                 }
             }
         };
+    }
+
+    private void removeAllMessage() {
+        mHandler.removeMessages(START_PUSH_PROCESS);
+        mHandler.removeMessages(START_PUSH_SDK);
+        mHandler.removeMessages(STOP_PUSH_SDK);
+        mHandler.removeMessages(RESTART_PUSH_SDK);
     }
 
     @Override
@@ -127,6 +142,7 @@ public class PushSdk {
             log.info("PushSdk mServiceConnection onServiceConnected()");
             // 获取Binder
             mPushService = IPushService.Stub.asInterface(binder);
+            mHandler.removeMessages(START_PUSH_SDK);
             mHandler.sendEmptyMessage(START_PUSH_SDK);
         }
 
@@ -194,8 +210,10 @@ public class PushSdk {
         mAppid = appid;
         mPushCallback = pushCallback;
 
+
         if (mPushService == null) {
-            startPushService(mContext);
+            mHandler.removeMessages(START_PUSH_PROCESS);
+            mHandler.sendEmptyMessage(START_PUSH_PROCESS);
         } else {
             mHandler.removeMessages(START_PUSH_SDK);
             mHandler.sendEmptyMessage(START_PUSH_SDK);
@@ -207,6 +225,12 @@ public class PushSdk {
      */
     public synchronized void restartPushSdk() {
         log.info("restartPushSdk()");
+        mHandler.removeMessages(RESTART_PUSH_SDK);
+        mHandler.sendEmptyMessage(RESTART_PUSH_SDK);
+    }
+
+    private synchronized void restartPushSdkInThread() {
+        log.info("restartPushSdkInThread()");
         if (mPushService != null) {
             try {
                 mPushService.restartPushSdk();
@@ -221,6 +245,7 @@ public class PushSdk {
      */
     public synchronized void stop() {
         log.info("stop()");
+        mHandler.removeMessages(STOP_PUSH_SDK);
         mHandler.sendEmptyMessage(STOP_PUSH_SDK);
     }
 
