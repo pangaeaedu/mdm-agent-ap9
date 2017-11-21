@@ -14,28 +14,6 @@ import android.telephony.TelephonyManager;
 
 public class DeviceUtil {
 
-//    public static String generateDeviceId(Context context) {
-//        String mac = null;
-//        while (true) {
-//            try {
-//                WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-//                WifiInfo info = wifi.getConnectionInfo();
-//                mac = info.getMacAddress();
-//                if (mac != null && !mac.isEmpty()) {
-//                    mac = mac.replace(":", "");
-//                    break;
-//                }
-//                Thread.sleep(1000);
-//            } catch (Exception e) {
-//
-//            }
-//        }
-//
-//        TelephonyManager mTelephonyMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-//        final String deviceId = mTelephonyMgr.getDeviceId() + mac;
-//        return deviceId;
-//    }
-
     public static String getMac(Context context) {
         String mac = null;
         while (true) {

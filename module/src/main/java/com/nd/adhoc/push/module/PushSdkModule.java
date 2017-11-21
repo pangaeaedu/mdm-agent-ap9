@@ -10,7 +10,6 @@ import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.util.HashMap;
 
 /**
  * Created by XWQ on 2017/8/29 0029.
@@ -60,7 +59,7 @@ public class PushSdkModule {
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    private void doStartPushSdk(final Context context, String appid, String deviceid, String ip, int port, IPushSdkCallback pushCallback) {
+    private void doStartPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
             final String packageName = context.getPackageName();
             File sdCard = Environment.getExternalStorageDirectory();
@@ -73,7 +72,6 @@ public class PushSdkModule {
             }
 
             String pseudoId = DeviceUtil.getPseudoId();
-            String pseudoIdLong = DeviceUtil.getPseudoIDLong();
 
             mManufactor = DeviceUtil.getManufactorer();
             mImei = DeviceUtil.getImei(context);
@@ -110,7 +108,7 @@ public class PushSdkModule {
      * @param pushCallback      消息到来的回调
      */
     public void startPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
-        doStartPushSdk(context, appid, null, ip, port, pushCallback);
+        doStartPushSdk(context, appid, ip, port, pushCallback);
     }
 
     /**
@@ -120,6 +118,7 @@ public class PushSdkModule {
      * @param port      负载均衡服务端口
      */
     public void setLoadBalancer(String host, int port) {
+        log.info("setLoadBalancer( "+ host + " , " + port + " ) ");
         libpushclient.native_pushSetLoadBalancer(host, port);
     }
 
@@ -159,6 +158,7 @@ public class PushSdkModule {
      * 停止接收push消息
      */
     public void stop() {
+        log.info("stop()");
         libpushclient.native_pushDisconnect();
     }
 

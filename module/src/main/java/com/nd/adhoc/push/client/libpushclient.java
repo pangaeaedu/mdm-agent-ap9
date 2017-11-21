@@ -2,8 +2,6 @@ package com.nd.adhoc.push.client;
 
 import com.nd.adhoc.push.module.PushSdkModule;
 
-import java.util.HashMap;
-
 public class libpushclient {
 
     static {
