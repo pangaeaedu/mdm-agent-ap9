@@ -28,6 +28,8 @@ public class PushSdkModule {
 
     private String mAppid;
 
+    private String mAppKey;
+
     private String mManufactor;
 
     private String mImei;
@@ -59,7 +61,7 @@ public class PushSdkModule {
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    private void doStartPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
+    private void doStartPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
             final String packageName = context.getPackageName();
             File sdCard = Environment.getExternalStorageDirectory();
@@ -92,8 +94,12 @@ public class PushSdkModule {
         mIp = ip;
         mPort = port;
         mAppid = appid;
+        mAppKey = appKey;
         mPushCallback = pushCallback;
-        libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+        if (null==mAppKey) {
+            mAppKey = "";
+        }
+        libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
 
         mInited = true;
     }
@@ -107,8 +113,8 @@ public class PushSdkModule {
      * @param port              push服务的端口
      * @param pushCallback      消息到来的回调
      */
-    public void startPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
-        doStartPushSdk(context, appid, ip, port, pushCallback);
+    public void startPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
+        doStartPushSdk(context, appid, appKey, ip, port, pushCallback);
     }
 
     /**
@@ -150,7 +156,10 @@ public class PushSdkModule {
         } else if (mAndroidId == null || mAndroidId.isEmpty()) {
             log.warn("AndroidId is null");
         } else {
-            libpushclient.native_pushLogin(mIp, mPort, mAppid, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+            if (null==mAppKey) {
+                mAppKey = "";
+            }
+            libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
         }
     }
 

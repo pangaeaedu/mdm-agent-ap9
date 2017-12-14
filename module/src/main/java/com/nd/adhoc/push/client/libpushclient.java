@@ -24,7 +24,7 @@ public class libpushclient {
     public static native void native_pushSetLoadBalancer(String host, int port);
 
     // 开始接收Push消息
-    public static native void native_pushLogin(String ip, int port, String appId, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
+    public static native void native_pushLogin(String ip, int port, String appId, String mAppKey, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
 
     // 停止接收Push消息
     public static native void native_pushDisconnect();

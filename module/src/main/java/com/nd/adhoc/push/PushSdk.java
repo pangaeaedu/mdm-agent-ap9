@@ -27,12 +27,13 @@ public class PushSdk {
      *
      * @param context      context
      * @param appid        从Push后台申请的appId
+     * @param appid        从Push后台申请的appKey
      * @param ip           push服务的IP
      * @param port         push服务的端口
      * @param pushCallback 消息到来的回调
      */
-    public synchronized void startPushSdk(final Context context, String appid, String ip, int port, IPushSdkCallback pushCallback) {
-        PushSdkModule.getInstance().startPushSdk(context, appid, ip, port, pushCallback);
+    public synchronized void startPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
+        PushSdkModule.getInstance().startPushSdk(context, appid, appKey, ip, port, pushCallback);
     }
 
     /**
