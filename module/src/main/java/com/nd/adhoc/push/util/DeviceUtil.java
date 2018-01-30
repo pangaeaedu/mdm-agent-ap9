@@ -7,12 +7,17 @@ import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import com.nd.adhoc.push.module.PushSdkModule;
+
+import org.apache.log4j.Logger;
+
 /**
  * date: 2017/4/7 0007
  * author: cbs
  */
 
 public class DeviceUtil {
+    private static Logger log = Logger.getLogger(PushSdkModule.class.getSimpleName());
 
     public static String getMac(Context context) {
         String mac = null;
@@ -70,12 +75,22 @@ public class DeviceUtil {
     }
 
     public static String getAndroidId(Context context) {
-        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        try {
+            return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        } catch (Exception e) {
+            log.warn("get android failed , " + e.toString());
+            return "";
+        }
     }
 
     public static String getImei(Context context) {
-        TelephonyManager TelephonyMgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        return TelephonyMgr.getDeviceId();
+        try {
+            TelephonyManager TelephonyMgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            return TelephonyMgr.getDeviceId();
+        } catch (Exception e) {
+            log.warn("get imei failed, " + e.toString());
+            return "";
+        }
     }
 
     public static String getManufactorer() {
