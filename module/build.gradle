@@ -14,5 +14,6 @@ android {
     }
     sourceSets.main {
         jniLibs.srcDir 'libs'
+        aidl.srcDirs=['src/main/aidl/com/nd/sdp/adhoc/push']
     }
 }

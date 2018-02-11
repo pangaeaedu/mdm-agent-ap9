@@ -1,6 +1,11 @@
 package com.nd.adhoc.push;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import com.nd.adhoc.push.module.PushSdkModule;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
@@ -12,11 +17,21 @@ public class PushSdk {
         return instance;
     }
 
+    private Context context = null;
+
+    private BroadcastReceiver mReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    restartPushSdk();
+                }
+            };
+
     /**
      * 设置负载均衡服务
      *
-     * @param host      负载均衡服务地址
-     * @param port      负载均衡服务端口
+     * @param host 负载均衡服务地址
+     * @param port 负载均衡服务端口
      */
     public synchronized void setLoadBalancer(String host, int port) {
         PushSdkModule.getInstance().setLoadBalancer(host, port);
@@ -33,6 +48,16 @@ public class PushSdk {
      * @param pushCallback 消息到来的回调
      */
     public synchronized void startPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
+        try {
+            if (context != null && this.context != context) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+                context.registerReceiver(mReceiver, filter);
+                this.context = context;
+            }
+        } catch (Exception e) {
+            Log.d("PUSH", "register push sdk broadcastreceiver failed : " + e.toString());
+        }
         PushSdkModule.getInstance().startPushSdk(context, appid, appKey, ip, port, pushCallback);
     }
 
