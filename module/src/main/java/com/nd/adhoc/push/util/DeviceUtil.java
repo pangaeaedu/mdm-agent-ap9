@@ -28,11 +28,13 @@ public class DeviceUtil {
                 mac = info.getMacAddress();
                 if (mac != null && !mac.isEmpty()) {
                     mac = mac.replace(":", "");
+                    log.warn("get mac  " + mac);
                     break;
                 }
+                log.warn("get mac failed, will retry after 1 second");
                 Thread.sleep(1000);
             } catch (Exception e) {
-
+                log.warn("get mac exception " + e.toString());
             }
         }
         return mac;
