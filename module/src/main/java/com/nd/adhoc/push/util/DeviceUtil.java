@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import com.nd.adhoc.push.module.PushSdkModule;
 
@@ -97,5 +98,19 @@ public class DeviceUtil {
 
     public static String getManufactorer() {
         return Build.MANUFACTURER;
+    }
+
+    // 只有 ND3 上才有
+    public static String getND3RomVersion(String pDefault) {
+        String systemVersion = null;
+        String model = Build.MODEL;
+        if (model.contains("ND3")) {
+            systemVersion = SettingSDK.getSystemVersion("ro.product.firmware.version", pDefault);
+        }
+        return systemVersion;
+    }
+
+    public static boolean isND3Device() {
+        return !TextUtils.isEmpty(getND3RomVersion(""));
     }
 }

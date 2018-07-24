@@ -6,6 +6,7 @@ import android.os.Environment;
 
 import com.nd.adhoc.push.client.libpushclient;
 import com.nd.adhoc.push.util.DeviceUtil;
+import com.nd.adhoc.push.util.StorageUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
@@ -60,46 +61,46 @@ public class PushSdkModule {
     /**
      * 开始接收Push消息
      *
-     * @param context           context
-     * @param appid             从Push后台申请的appId
-     * @param ip                push服务的IP
-     * @param port              push服务的端口
-     * @param pushCallback      消息到来的回调
+     * @param context      context
+     * @param appid        从Push后台申请的appId
+     * @param ip           push服务的IP
+     * @param port         push服务的端口
+     * @param pushCallback 消息到来的回调
      */
     private void doStartPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
             final String packageName = context.getPackageName();
             File sdCard = Environment.getExternalStorageDirectory();
-            if (null==sdCard){
+            if (null == sdCard) {
                 sdCard = Environment.getDownloadCacheDirectory();
             }
-            if (null!=sdCard) {
+            if (null != sdCard) {
                 String logPath = sdCard + "/" + packageName + "/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
             mManufactor = DeviceUtil.getManufactorer();
             mImei = DeviceUtil.getImei(context);
-            if (null==mImei) {
+            if (null == mImei) {
                 mImei = pseudoId;
             }
             mMac = DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
         }
         log.warn("start push sdk" +
-                 " , ip = " + ip +
-                 " , port = " + port +
-                 " , appid = " + appid +
-                 " , manufactorer = " + mManufactor +
-                 " , imei = " + mImei +
-                 " , mac = " + mMac +
-                 " , androidid = " + mAndroidId);
+                " , ip = " + ip +
+                " , port = " + port +
+                " , appid = " + appid +
+                " , manufactorer = " + mManufactor +
+                " , imei = " + mImei +
+                " , mac = " + mMac +
+                " , androidid = " + mAndroidId);
         mIp = ip;
         mPort = port;
         mAppid = appid;
         mAppKey = appKey;
         mPushCallback = pushCallback;
-        if (null==mAppKey) {
+        if (null == mAppKey) {
             mAppKey = "";
         }
         libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
@@ -110,22 +111,30 @@ public class PushSdkModule {
     /**
      * 开始接收Push消息
      *
-     * @param context           context
-     * @param appid             从Push后台申请的appId
-     * @param ip                push服务的IP
-     * @param port              push服务的端口
-     * @param pushCallback      消息到来的回调
+     * @param context      context
+     * @param appid        从Push后台申请的appId
+     * @param ip           push服务的IP
+     * @param port         push服务的端口
+     * @param pushCallback 消息到来的回调
      */
     @SuppressLint("DefaultLocale")
     public void startPushSdk(final Context context, final String appid, final String appKey, final String ip, final int port, final IPushSdkCallback pushCallback) {
         final String packageName = context.getPackageName();
-        File sdCard = Environment.getExternalStorageDirectory();
-        if (null==sdCard){
-            sdCard = Environment.getDownloadCacheDirectory();
-        }
-        if (null!=sdCard) {
-            String logPath = sdCard + "/" + packageName + "/adhoclog/";
-            String log4jLogPath = logPath+"push.log";
+        String sdCardPath = StorageUtil.getSdCardPath();
+        if (null == sdCardPath || sdCardPath.isEmpty()) {
+            LogConfigurator logConfigurator = new LogConfigurator();
+            logConfigurator.setRootLevel(Level.ALL);
+            logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
+            logConfigurator.setMaxFileSize(1024 * 1024 * 50);
+            logConfigurator.setMaxBackupSize(5);
+            logConfigurator.setImmediateFlush(true);
+            logConfigurator.setUseFileAppender(false);
+            logConfigurator.setUseLogCatAppender(true);
+            logConfigurator.configure();
+            log.warn("no sdcard for log");
+        } else {
+            String logPath = sdCardPath + "/" + packageName + "/adhoclog/";
+            String log4jLogPath = logPath + "push.log";
             LogConfigurator logConfigurator = new LogConfigurator();
             logConfigurator.setFileName(log4jLogPath);
             logConfigurator.setRootLevel(Level.ALL);
@@ -137,25 +146,14 @@ public class PushSdkModule {
             logConfigurator.setUseLogCatAppender(true);
             logConfigurator.configure();
             log.warn("logpath " + log4jLogPath);
-        } else  {
-            LogConfigurator logConfigurator = new LogConfigurator();
-            logConfigurator.setRootLevel(Level.ALL);
-            logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
-            logConfigurator.setMaxFileSize(1024 * 1024 * 50);
-            logConfigurator.setMaxBackupSize(5);
-            logConfigurator.setImmediateFlush(true);
-            logConfigurator.setUseFileAppender(false);
-            logConfigurator.setUseLogCatAppender(true);
-            logConfigurator.configure();
-            log.warn("no sdcard for log");
         }
-        log.info(String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey!=null ? appKey : "null", ip, port));
+        log.info(String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info(String.format("before run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey!=null ? appKey : "null", ip, port));
+                log.info(String.format("before run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
                 doStartPushSdk(context, appid, appKey, ip, port, pushCallback);
-                log.info(String.format("after run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey!=null ? appKey : "null", ip, port));
+                log.info(String.format("after run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
             }
         });
     }
@@ -163,8 +161,8 @@ public class PushSdkModule {
     /**
      * 设置负载均衡服务
      *
-     * @param host      负载均衡服务地址
-     * @param port      负载均衡服务端口
+     * @param host 负载均衡服务地址
+     * @param port 负载均衡服务端口
      */
     @SuppressLint("DefaultLocale")
     public void setLoadBalancer(final String host, final int port) {
@@ -214,7 +212,7 @@ public class PushSdkModule {
                 } else if (mAndroidId == null || mAndroidId.isEmpty()) {
                     log.warn("AndroidId is null");
                 } else {
-                    if (null==mAppKey) {
+                    if (null == mAppKey) {
                         mAppKey = "";
                     }
                     libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
@@ -278,7 +276,7 @@ public class PushSdkModule {
 
                 log.warn("doNotifyClientConnectStatus" +
                         " , currentStatus = " + mIsConnected +
-                        " , newStatus  = " +isConnected);
+                        " , newStatus  = " + isConnected);
                 if (isConnected != mIsConnected || mIsFirst) {
                     mIsFirst = false;
                     mIsConnected = isConnected;
@@ -298,11 +296,11 @@ public class PushSdkModule {
     }
 
     public void notifyDeviceToken(final String deviceToken) {
-        log.info("notifyDeviceToken(deviceToken = " + deviceToken+")");
+        log.info("notifyDeviceToken(deviceToken = " + deviceToken + ")");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info("before run notifyDeviceToken(deviceToken = " + deviceToken+")");
+                log.info("before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
                 mDevicetoken = deviceToken;
                 if (mPushCallback != null) {
                     try {
@@ -311,13 +309,13 @@ public class PushSdkModule {
                         e.printStackTrace();
                     }
                 }
-                log.info("after run notifyDeviceToken(deviceToken = " + deviceToken+")");
+                log.info("after run notifyDeviceToken(deviceToken = " + deviceToken + ")");
             }
         });
     }
 
     @SuppressLint("DefaultLocale")
-    public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final byte[] data, final String []extraKeys, final String []extraValues)  {
+    public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final byte[] data, final String[] extraKeys, final String[] extraValues) {
         log.info(String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
         executorService.submit(new Runnable() {
             @Override
