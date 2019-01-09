@@ -2,7 +2,12 @@ apply from: 'sdp.gradle'
 dependencies {
     compile 'log4j:log4j:1.2.16'
     compile 'de.mindpipe.android:android-logging-log4j:1.0.3'
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    api("com.nd.android.adhoc.basic:adhoc_util_system:0.0.76.13-0.6.2.0-SNAPSHOT") {
+    }
+
 }
 android {
     packagingOptions {
