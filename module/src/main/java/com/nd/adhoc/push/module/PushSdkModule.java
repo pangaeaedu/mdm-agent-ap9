@@ -42,7 +42,7 @@ public class PushSdkModule {
 
     private String mAndroidId;
 
-    private int mReconnectIntervalMs = 30000;
+    private int mReconnectIntervalMs = 10000;
 
     private IPushSdkCallback mPushCallback;
 
@@ -106,6 +106,21 @@ public class PushSdkModule {
         libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
 
         mInited = true;
+    }
+
+    /**
+     * 发送上行消息
+     *
+     * @param msgid 消息ID
+     * @param ttlSeconds 过期时间
+     * @param contentType 消息类型
+     * @param content 消息内容
+     * @return 0 成功
+     *         非0 失败
+     */
+    @SuppressLint("DefaultLocale")
+    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
     }
 
     /**

@@ -29,6 +29,9 @@ public class libpushclient {
     // 停止接收Push消息
     public static native void native_pushDisconnect();
 
+    // 发送上行消息
+    public static native int native_sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content);
+
     // 标记消息已读
     public static native void native_pushAckMsg(long msgId);
 

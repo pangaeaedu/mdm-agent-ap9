@@ -22,21 +22,20 @@ public class DeviceUtil {
 
     public static String getMac(Context context) {
         String mac = null;
-        while (true) {
-            try {
-                WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                WifiInfo info = wifi.getConnectionInfo();
-                mac = info.getMacAddress();
-                if (mac != null && !mac.isEmpty()) {
-                    mac = mac.replace(":", "");
-                    log.warn("get mac  " + mac);
-                    break;
-                }
-                log.warn("get mac failed, will retry after 1 second");
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                log.warn("get mac exception " + e.toString());
+        try {
+            WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = wifi.getConnectionInfo();
+            mac = info.getMacAddress();
+            if (mac != null && !mac.isEmpty()) {
+                mac = mac.replace(":", "");
+                log.warn("get mac  " + mac);
             }
+        } catch (Exception e) {
+            log.warn("get mac exception " + e.toString());
+        }
+
+        if (mac==null) {
+            return "";
         }
         return mac;
     }

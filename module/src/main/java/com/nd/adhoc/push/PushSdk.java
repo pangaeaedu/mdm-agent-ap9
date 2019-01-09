@@ -19,14 +19,6 @@ public class PushSdk {
 
     private Context context = null;
 
-    private BroadcastReceiver mReceiver =
-            new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    restartPushSdk();
-                }
-            };
-
     /**
      * 设置负载均衡服务
      *
@@ -48,17 +40,21 @@ public class PushSdk {
      * @param pushCallback 消息到来的回调
      */
     public synchronized void startPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
-        try {
-            if (context != null && this.context != context) {
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-                context.registerReceiver(mReceiver, filter);
-                this.context = context;
-            }
-        } catch (Exception e) {
-            Log.d("PUSH", "register push sdk broadcastreceiver failed : " + e.toString());
-        }
         PushSdkModule.getInstance().startPushSdk(context, appid, appKey, ip, port, pushCallback);
+    }
+
+    /**
+     * 发送上行消息
+     *
+     * @param msgid 消息ID
+     * @param ttlSeconds 过期时间
+     * @param contentType 消息类型
+     * @param content 消息内容
+     * @return 0 成功
+     *         非0 失败
+     */
+    public synchronized int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+        return PushSdkModule.getInstance().sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
     }
 
     /**
