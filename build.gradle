@@ -1,8 +1,5 @@
 buildscript {
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2"
-    }
+    apply from: 'http://git.sdp.nd/adhoc-android/adhoc-android-doc/raw/master/build_config_0.6.2.0.gradle'
 
     repositories {
         maven {
@@ -10,5 +7,12 @@ buildscript {
             url "http://nexus.sdp.nd/nexus/content/groups/android-public/"
         }
         mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$gradlePluginVersion"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonar_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
