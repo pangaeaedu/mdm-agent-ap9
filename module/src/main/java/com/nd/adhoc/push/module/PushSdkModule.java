@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import de.mindpipe.android.logging.log4j.LogConfigurator;
 
@@ -52,7 +54,13 @@ public class PushSdkModule {
 
     private boolean mInited = false;
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private boolean mIsScheduleStarting = false;
+
+    private long mLastRestartTimestampMs = 0;
+
+    private static long RESTART_INTERVAL_MS = 5000;
+
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     public static PushSdkModule getInstance() {
         return instance;
@@ -103,9 +111,8 @@ public class PushSdkModule {
         if (null == mAppKey) {
             mAppKey = "";
         }
-        libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
-
         mInited = true;
+        restartPushSdk();
     }
 
     /**
@@ -201,41 +208,63 @@ public class PushSdkModule {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info("before run restartPushSdk");
-
-                log.warn("restart push sdk" +
-                        " , ip = " + mIp +
-                        " , port = " + mPort +
-                        " , appid = " + mAppid +
-                        " , manufactorer = " + mManufactor +
-                        " , imei = " + mImei +
-                        " , mac = " + mMac +
-                        " , androidid = " + mAndroidId);
-                doNotifyClientConnectStatus(false);
-                if (mIp == null || mIp.isEmpty()) {
-                    log.warn("Ip is null");
-                } else if (mPort <= 0) {
-                    log.warn("Port is wrong. Port = " + mPort);
-                } else if (mAppid == null || mAppid.isEmpty()) {
-                    log.warn("App id is null");
-                } else if (mManufactor == null || mManufactor.isEmpty()) {
-                    log.warn("Manufactor is null");
-                } else if (mImei == null || mImei.isEmpty()) {
-                    log.warn("Imei is null");
-                } else if (mMac == null || mMac.isEmpty()) {
-                    log.warn("Mac is null");
-                } else if (mAndroidId == null || mAndroidId.isEmpty()) {
-                    log.warn("AndroidId is null");
-                } else {
-                    if (null == mAppKey) {
-                        mAppKey = "";
+                long lastRestartInterval = System.currentTimeMillis()-mLastRestartTimestampMs;
+                long scheduleInterval = RESTART_INTERVAL_MS-lastRestartInterval;
+                if (scheduleInterval>0) {
+                    if (mIsScheduleStarting) {
+                        log.info("restartPushSdk ignored , already scheduled");
+                        return;
                     }
-                    libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+                    mIsScheduleStarting = true;
+                    log.info("restartPushSdk schedule after " + scheduleInterval + " ms" );
+                    executorService.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            doRestartPushSdk();
+                        }
+                    },scheduleInterval, TimeUnit.MILLISECONDS);
+                } else {
+                    doRestartPushSdk();
                 }
-
-                log.info("after run restartPushSdk");
             }
         });
+    }
+
+    private void doRestartPushSdk() {
+        log.info("before run restartPushSdk");
+        mIsScheduleStarting = false;
+        mLastRestartTimestampMs = System.currentTimeMillis();
+        log.warn("restart push sdk" +
+                " , ip = " + mIp +
+                " , port = " + mPort +
+                " , appid = " + mAppid +
+                " , manufactorer = " + mManufactor +
+                " , imei = " + mImei +
+                " , mac = " + mMac +
+                " , androidid = " + mAndroidId);
+        doNotifyClientConnectStatus(false);
+        if (mIp == null || mIp.isEmpty()) {
+            log.warn("Ip is null");
+        } else if (mPort <= 0) {
+            log.warn("Port is wrong. Port = " + mPort);
+        } else if (mAppid == null || mAppid.isEmpty()) {
+            log.warn("App id is null");
+        } else if (mManufactor == null || mManufactor.isEmpty()) {
+            log.warn("Manufactor is null");
+        } else if (mImei == null || mImei.isEmpty()) {
+            log.warn("Imei is null");
+        } else if (mMac == null || mMac.isEmpty()) {
+            log.warn("Mac is null");
+        } else if (mAndroidId == null || mAndroidId.isEmpty()) {
+            log.warn("AndroidId is null");
+        } else {
+            if (null == mAppKey) {
+                mAppKey = "";
+            }
+            libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+        }
+
+        log.info("after run restartPushSdk");
     }
 
     /**
