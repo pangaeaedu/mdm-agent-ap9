@@ -204,7 +204,7 @@ public class PushSdkModule {
      * 断开并重新连接push服务
      */
     public void restartPushSdk() {
-        log.info("restartPushSdk");
+        log.info("restartPushSdk , version = 0.3.23");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -243,28 +243,47 @@ public class PushSdkModule {
                 " , mac = " + mMac +
                 " , androidid = " + mAndroidId);
         doNotifyClientConnectStatus(false);
+        boolean needstart = false;
         if (mIp == null || mIp.isEmpty()) {
             log.warn("Ip is null");
         } else if (mPort <= 0) {
             log.warn("Port is wrong. Port = " + mPort);
         } else if (mAppid == null || mAppid.isEmpty()) {
             log.warn("App id is null");
-        } else if (mManufactor == null || mManufactor.isEmpty()) {
-            log.warn("Manufactor is null");
-        } else if (mImei == null || mImei.isEmpty()) {
-            log.warn("Imei is null");
-        } else if (mMac == null || mMac.isEmpty()) {
-            log.warn("Mac is null");
-        } else if (mAndroidId == null || mAndroidId.isEmpty()) {
-            log.warn("AndroidId is null");
         } else {
-            if (null == mAppKey) {
-                mAppKey = "";
+            if (mManufactor == null || mManufactor.isEmpty()) {
+                log.warn("Manufactor is null");
+                mManufactor = "";
             }
-            libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+            if (mImei == null || mImei.isEmpty()) {
+                log.warn("Imei is null");
+                mImei = "";
+            } else {
+                needstart = true;
+            }
+            if (mMac == null || mMac.isEmpty()) {
+                log.warn("Mac is null");
+                mMac = "";
+            } else {
+                needstart = true;
+            }
+            if (mAndroidId == null || mAndroidId.isEmpty()) {
+                log.warn("AndroidId is null");
+                mAndroidId = "";
+            } else {
+                needstart = true;
+            }
         }
-
-        log.info("after run restartPushSdk");
+        if (null == mAppKey) {
+            mAppKey = "";
+        }
+        if (needstart) {
+            libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+            log.info("after run restartPushSdk");
+        } else {
+            log.info("retry restartPushSdk");
+            restartPushSdk();
+        }
     }
 
     /**
