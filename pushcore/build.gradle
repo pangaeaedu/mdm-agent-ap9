@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+apply from: file('gradleScript/dev.gradle')
+
+if (!project.hasProperty('LOCAL_BUILD_ENV')) {
+    apply from: 'http://git.sdp.nd/adhoc-android/adhoc-android-doc/raw/master/maven_upload.gradle'
+}
+
+android {
+    compileSdkVersion "$androidCompileSdkVersion".toInteger()
+    buildToolsVersion "$androidBuildToolsVersion"
+
+    defaultConfig {
+        minSdkVersion "$androidMinSdkVersion".toInteger()
+        targetSdkVersion "$androidTargetSdkVersion".toInteger()
+        multiDexEnabled true  // dex突破65535的限制
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // 路由能力 在 编译期需要根据这个变量去根据模块创建类文件，实现分模块懒加载
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ComponentId: "pushcore"]
+            }
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+tasks.withType(JavaCompile) { options.encoding = "UTF-8" }

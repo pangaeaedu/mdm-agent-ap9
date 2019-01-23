@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+apply from: file('gradleScript/dev.gradle')
+
+android {
+
+    compileSdkVersion "$androidCompileSdkVersion".toInteger()
+    buildToolsVersion "$androidBuildToolsVersion"
+
+    defaultConfig {
+        minSdkVersion "$androidMinSdkVersion".toInteger()
+        targetSdkVersion "$androidTargetSdkVersion".toInteger()
+        multiDexEnabled true  // dex突破65535的限制
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // 路由能力 在 编译期需要根据这个变量去根据模块创建类文件，实现分模块懒加载
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ComponentId: "adhocpush"]
+            }
+        }
+
+    }
+
+    useLibrary 'org.apache.http.legacy'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+        aidl.srcDirs=['src/main/aidl/com/nd/sdp/adhoc/push']
+    }
+
+}
+

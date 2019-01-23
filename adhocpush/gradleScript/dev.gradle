@@ -1,0 +1,48 @@
+dependencies {
+
+    compile 'log4j:log4j:1.2.16'
+    compile 'de.mindpipe.android:android-logging-log4j:1.0.3'
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    api project (":pushcore")
+//    api project (":module")
+
+    api 'org.apache.commons:commons-lang3:3.6'
+    api 'commons-net:commons-net:3.5'
+
+    api 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0'
+
+    try {
+        api project(':mdm_env')
+    } catch (Exception ignored) {
+        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
+    }
+
+    compile ("com.nd.sdp.adhoc:adhoc-sdk:$adhoc_sdk_version")
+
+    api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
+    try {
+        api project(':mdm_biz_common')
+    } catch (Exception ignored) {
+        api("com.nd.android.mdm.biz:mdm_biz_common:$mdm_biz_version")
+    }
+
+    compile "com.nd.sdp.android.serviceloader:service-loader-annotation:$service_loader_version"
+    annotationProcessor "com.nd.sdp.android.serviceloader:service-loader-compiler:$service_loader_version"
+
+}
+
+configurations {
+    provided {
+        dependencies.all { dep ->
+            configurations.default.exclude group: dep.group, module: dep.name
+
+        }
+    }
+    compile.extendsFrom provided
+}

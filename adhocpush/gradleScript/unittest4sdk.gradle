@@ -1,0 +1,114 @@
+dependencies {
+
+    testCompile "junit:junit:4.12"
+    testCompile "org.mockito:mockito-core:1.9.5"
+
+    testCompile("org.robolectric:robolectric:3.0") {
+//        exclude group: 'org.apache.ant', module: 'ant'
+//        exclude group: 'org.apache.ant', module: 'ant-launcher'
+    }
+    testCompile('org.robolectric:robolectric-annotations:3.0') {
+//        exclude group: 'org.apache.ant', module: 'ant'
+//        exclude group: 'org.apache.ant', module: 'ant-launcher'
+    }
+    //robolectric针对support-v4的shadows
+    testCompile("org.robolectric:shadows-support-v4:3.0") {
+//        exclude group: 'org.apache.ant', module: 'ant'
+//        exclude group: 'org.apache.ant', module: 'ant-launcher'
+    }
+//    compile 'com.android.support:support-v4:24.2.1'
+//    testCompile 'org.json:json:20140107'
+//    testCompile 'com.google.android:android:4.1.1.4'
+
+    testCompile "org.powermock:powermock-module-junit4:1.6.6"
+    testCompile "org.powermock:powermock-module-junit4-rule:1.6.6"
+    testCompile "org.powermock:powermock-api-mockito:1.6.6"
+    testCompile "org.powermock:powermock-classloading-xstream:1.6.6"
+}
+
+
+android {
+    sourceSets {
+        //sonar 脚本--begin 文件夹只能是src/test
+        instrumentTest.setRoot('src/test')
+        instrumentTest {
+            java {
+                srcDirs = [
+                        'src/test/java'
+                ]
+            }
+            res.srcDirs = ['src/main/res', 'src/test/res']
+            resources.srcDirs = [
+                    'src/test/resources'
+            ]
+        }
+        //sonar 脚本--end
+    }
+
+    jacoco {
+        version "0.7.7.201606060606"
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+            }
+        }
+    }
+}
+
+def sonarHostUrl = "http://sonar.sdp.nd"
+def sonarProfile = "android.sdp.nd"
+if (hasProperty('LOCAL_BUILD_ENV')) {
+    sonarHostUrl = "http://sonar.debug.sdp.nd"
+    sonarProfile = "android.sdp.nd"
+}
+
+apply plugin: 'jacoco'
+apply plugin: 'org.sonarqube'
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", moduleGroupId + ":" + moduleName // 项目名称，记得修改
+        property "sonar.projectName", moduleName // 项目名称，记得修改
+        property "sonar.projectVersion", moduleVersion // 项目版本，记得修改
+        property "sonar.language", "java"
+        property "sonar.host.url", sonarHostUrl
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.profile", sonarProfile
+        property "sonar.dynamicAnalysis", "reuseReports"
+        property "sonar.sources", "src/main"
+        property "sonar.tests", android.sourceSets.instrumentTest.java.srcDirs
+        property 'sonar.import_unknown_files', true
+        property "sonar.test.binaries", "${buildDir}/intermediates/classes/release"
+        property "sonar.java.binaries", "${buildDir}/intermediates/classes/release"
+        property 'sonar.android.lint.reportsPath', "${buildDir}/outputs/lint-results.xml"
+        //添加android lint检查报告输出
+        property 'sonar.jacoco.reportPath', "${buildDir}/jacoco/testReleaseUnitTest.exec"
+        property "sonar.jacoco.itReportPath", "$buildDir/jacoco/testReleaseUnitTest.exec"
+        property 'sonar.junit.reportsPath', "${buildDir}/test-results/testReleaseUnitTest/release"
+        property 'sonar.surefire.reportsPath', "${buildDir}/test-results/testReleaseUnitTest/release"
+        property "sonar.cobertura.reportPath", "${buildDir}/reports/coverage/debug/report.xml"
+        property "sonar.core.codeCoveragePlugin", "cobertura"
+
+        property "sonar.java.libraries", android.libraryVariants.javaCompile.classpath + "${android.sdkDirectory}/platforms/${android.compileSdkVersion}" + "${System.properties.'java.home'}/lib"
+        property "sonar.java.test.libraries", android.libraryVariants.javaCompile.classpath + "${android.sdkDirectory}/platforms/${android.compileSdkVersion}" + "${System.properties.'java.home'}/lib"
+
+        // 要排除的文件，记得修改
+        property "sonar.coverage.exclusions",
+                "src/main/res/**," +
+                        "src/main/AndroidManifest.xml,"
+
+
+
+
+        if (hasProperty('LOCAL_BUILD_ENV')) {
+            try {
+                property "sonar.login", testUser                        //本地使用，不要提交
+                property "sonar.password", testPassword                 //本地使用，不要提交
+            } catch (e) {
+            }
+        }
+    }
+}

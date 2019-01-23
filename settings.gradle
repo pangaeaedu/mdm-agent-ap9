@@ -1,1 +1,6 @@
-include ':module'
+include ':module',
+        ':pushcore',
+        ':adhocpush',
+        ':awspushchannel',
+        ':awsiotconfigpromethean',
+        ':awsiotconfigcore'
