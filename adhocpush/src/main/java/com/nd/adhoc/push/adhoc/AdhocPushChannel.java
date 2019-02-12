@@ -63,7 +63,7 @@ public class AdhocPushChannel extends BasePushChannel {
 
     @Override
     public int getChannelType() {
-        return 0;
+        return 1;
     }
 
     @Override
