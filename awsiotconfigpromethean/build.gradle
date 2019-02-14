@@ -29,17 +29,17 @@ dependencies {
 
     api project (':awsiotconfigcore')
 
-    try {
-        api project(':mdm_biz_common')
-    } catch (Exception ignored) {
-        api("com.nd.android.mdm.biz:mdm_biz_common:$mdm_biz_version")
-    }
-
-    try {
-        api project(':mdm_env')
-    } catch (Exception ignored) {
-        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
-    }
+//    try {
+//        api project(':mdm_biz_common')
+//    } catch (Exception ignored) {
+//        api("com.nd.android.mdm.biz:mdm_biz_common:$mdm_biz_version")
+//    }
+//
+//    try {
+//        api project(':mdm_env')
+//    } catch (Exception ignored) {
+//        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
+//    }
 
     try {
         api project(":assistant_sdk")

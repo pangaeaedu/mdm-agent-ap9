@@ -17,20 +17,20 @@ dependencies {
 
     api 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0'
 
-    try {
-        api project(':mdm_env')
-    } catch (Exception ignored) {
-        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
-    }
+//    try {
+//        api project(':mdm_env')
+//    } catch (Exception ignored) {
+//        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
+//    }
 
 //    compile ("com.nd.sdp.adhoc:adhoc-sdk:$adhoc_sdk_version")
 
-    api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
-    try {
-        api project(':mdm_biz_common')
-    } catch (Exception ignored) {
-        api("com.nd.android.mdm.biz:mdm_biz_common:$mdm_biz_version")
-    }
+//    api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
+//    try {
+//        api project(':mdm_biz_common')
+//    } catch (Exception ignored) {
+//        api("com.nd.android.mdm.biz:mdm_biz_common:$mdm_biz_version")
+//    }
 
     compile "com.nd.sdp.android.serviceloader:service-loader-annotation:$service_loader_version"
     annotationProcessor "com.nd.sdp.android.serviceloader:service-loader-compiler:$service_loader_version"
