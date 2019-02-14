@@ -1,6 +1,4 @@
-include ':module',
-        ':pushcore',
-        ':adhocpush',
-        ':awspushchannel',
-        ':awsiotconfigpromethean',
-        ':awsiotconfigcore'
+include ':pushcore', ':adhocpush'
+//        ':awspushchannel',
+//        ':awsiotconfigpromethean',
+//        ':awsiotconfigcore'
