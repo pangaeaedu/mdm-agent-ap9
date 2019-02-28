@@ -20,6 +20,7 @@ import de.mindpipe.android.logging.log4j.LogConfigurator;
 
 
 public class PushSdkModule {
+    private static final String TAG = "PushSdkModule";
     private static Logger log = Logger.getLogger(PushSdkModule.class.getSimpleName());
     private static PushSdkModule instance = new PushSdkModule();
 
@@ -87,7 +88,8 @@ public class PushSdkModule {
             mMac = DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
         }
-        log.warn("start push sdk" +
+
+        com.nd.android.adhoc.basic.log.Logger.e(TAG, "start push sdk" +
                 " , ip = " + ip +
                 " , port = " + port +
                 " , appid = " + appid +
@@ -254,7 +256,7 @@ public class PushSdkModule {
     }
 
     public void notifyClientConnectStatus(final boolean isConnected) {
-        log.info(String.format("notifyClientConnectStatus(%b)", isConnected));
+        com.nd.android.adhoc.basic.log.Logger.e(TAG, "notifyClientConnectStatus"+isConnected);
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -296,7 +298,7 @@ public class PushSdkModule {
     }
 
     public void notifyDeviceToken(final String deviceToken) {
-        log.info("notifyDeviceToken(deviceToken = " + deviceToken + ")");
+        com.nd.android.adhoc.basic.log.Logger.e(TAG, "notifyDeviceToken(deviceToken = " + deviceToken + ")");
         executorService.submit(new Runnable() {
             @Override
             public void run() {

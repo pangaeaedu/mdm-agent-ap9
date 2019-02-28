@@ -22,6 +22,7 @@ import com.nd.adhoc.push.core.IPushSendResult;
 import com.nd.adhoc.push.core.PushRecvDataImpl;
 import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
+import com.nd.android.adhoc.basic.log.CrashAnalytics;
 import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.mdm.biz.env.MdmEvnFactory;
 import com.nd.android.mdm.util.cmd.CmdUtil;
@@ -79,6 +80,8 @@ public class AdhocPushChannel extends BasePushChannel {
             PushSdkModule.getInstance().stop();
         }
 
+        CrashAnalytics.INSTANCE.reportException(new Exception("AdhocPushChannel start"));
+
         final Context context = AdhocBasicConfig.getInstance().getAppContext();
         return RxPermissions.getInstance(context)
                 .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -94,28 +97,12 @@ public class AdhocPushChannel extends BasePushChannel {
                             return true;
                         }
 
-                        Log.e(TAG, "start adhoc push failed, do not have write external " +
-                                "storage permission");
+                        CrashAnalytics.INSTANCE
+                                .reportException(new Exception("start adhoc push failed, do not have write external " +
+                                "storage permission"));
                         return false;
                     }
                 });
-
-//                .subscribe(new AdhocActionSubscriber<>(new Action1<Boolean>() {
-//                    @Override
-//                    public void call(Boolean aBoolean) {
-//                        if (aBoolean) {
-//                            String pushSrvIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
-//                            int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
-//
-//                            startAdhocPush(context, "mdm", null, pushSrvIp,
-//                                    pushSrvPort, mPushSdkCallback);
-//                        } else {
-//                            Log.e(TAG, "start adhoc push failed, do not have write external " +
-//                                    "storage permission");
-//                        }
-//                    }
-//                }));
-
     }
 
     private void startAdhocPush(final Context pContext, String appid, String appKey,
@@ -127,9 +114,11 @@ public class AdhocPushChannel extends BasePushChannel {
                 pContext.registerReceiver(mReceiver, filter);
             }
         } catch (Exception e) {
-            Log.d("PUSH", "register push sdk broadcastreceiver failed : " + e.toString());
+            CrashAnalytics.INSTANCE.reportException(e);
         }
 
+        Logger.e(TAG, "startAdhocPush appid:"+appid+" appKey:"+appKey
+                +" ip:"+ip+" port:"+port);
         PushSdkModule.getInstance().startPushSdk(pContext, appid, appKey, ip, port, pushCallback);
     }
 
@@ -190,8 +179,8 @@ public class AdhocPushChannel extends BasePushChannel {
                     listener.onPushDataArrived(AdhocPushChannel.this, data);
                 }
             } catch (Exception e) {
+                CrashAnalytics.INSTANCE.reportException(e);
                 e.printStackTrace();
-                Logger.e(TAG, "get error:" + e.toString() + "\n with messege:" + new String(content));
             }
 
             return UUID.randomUUID().toString().getBytes();
