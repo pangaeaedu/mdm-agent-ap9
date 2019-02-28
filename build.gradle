@@ -20,11 +20,13 @@ buildscript {
 }
 
 ext {
-    mdm_biz_version = '0.0.30.36-0.6.2.0-SNAPSHOT'
-    device_control_version = '0.2.36-0.6.2.0-SNAPSHOT'
-    deliver_version = '0.0.9.7-0.6.2.0-SNAPSHOT'
-    device_command_version = '0.0.2.22-0.6.2.0-SNAPSHOT'
-    location_verison = '0.0.8-develop-SNAPSHOT'
+    adhoc_basic_version = '1.1.205.7481cbd-hyk0.6.7.0opt-SNAPSHOT'
+
+    mdm_biz_version = '1.1.257.43ecbeb-yhq0.6.6.0reengineering-SNAPSHOT'
+    device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
+    deliver_version = '1.0.37.7cae020'
+    device_command_version = '1.1.87.24dfc01-hyk0.6.6.0opt-SNAPSHOT'
+    location_verison = '1.0.13.7af56f3'
     adhoc_sdk_version = '1.2.19.2078-develop-SNAPSHOT'
 }
 
