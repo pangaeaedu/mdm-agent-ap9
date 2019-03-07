@@ -80,8 +80,8 @@ public class AdhocPushChannel extends BasePushChannel {
             PushSdkModule.getInstance().stop();
         }
 
-        CrashAnalytics.INSTANCE.reportException(new Exception("AdhocPushChannel start"));
-
+//        CrashAnalytics.INSTANCE.reportException(new Exception("AdhocPushChannel start"));
+        Log.e(TAG, "AdhocPushChannel start");
         final Context context = AdhocBasicConfig.getInstance().getAppContext();
         return RxPermissions.getInstance(context)
                 .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -97,9 +97,10 @@ public class AdhocPushChannel extends BasePushChannel {
                             return true;
                         }
 
-                        CrashAnalytics.INSTANCE
-                                .reportException(new Exception("start adhoc push failed, do not have write external " +
-                                "storage permission"));
+//                        CrashAnalytics.INSTANCE
+//                                .reportException(new Exception("start adhoc push failed, do not have write external " +
+//                                "storage permission"));
+                        Log.e(TAG, "start adhoc push failed, do not have write external storage permission");
                         return false;
                     }
                 });
@@ -117,7 +118,7 @@ public class AdhocPushChannel extends BasePushChannel {
             CrashAnalytics.INSTANCE.reportException(e);
         }
 
-        Logger.e(TAG, "startAdhocPush appid:"+appid+" appKey:"+appKey
+        Log.e(TAG, "startAdhocPush appid:"+appid+" appKey:"+appKey
                 +" ip:"+ip+" port:"+port);
         PushSdkModule.getInstance().startPushSdk(pContext, appid, appKey, ip, port, pushCallback);
     }
