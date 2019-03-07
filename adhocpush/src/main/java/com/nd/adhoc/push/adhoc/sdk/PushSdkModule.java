@@ -3,6 +3,7 @@ package com.nd.adhoc.push.adhoc.sdk;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.adhoc.push.adhoc.utils.StorageUtil;
@@ -24,6 +25,7 @@ public class PushSdkModule {
     private static Logger log = Logger.getLogger(PushSdkModule.class.getSimpleName());
     private static PushSdkModule instance = new PushSdkModule();
 
+    private static final String TAG = "PushSdkModule";
     private String mIp;
 
     private int mPort;
@@ -94,7 +96,7 @@ public class PushSdkModule {
             mMac = DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
         }
-        log.warn("start push sdk" +
+        Log.e(TAG,"start push sdk" +
                 " , ip = " + ip +
                 " , port = " + port +
                 " , appid = " + appid +
@@ -168,13 +170,13 @@ public class PushSdkModule {
             logConfigurator.configure();
             log.warn("logpath " + log4jLogPath);
         }
-        log.info(String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
+        Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info(String.format("before run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
+                Log.e(TAG,String.format("before run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
                 doStartPushSdk(context, appid, appKey, ip, port, pushCallback);
-                log.info(String.format("after run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
+                Log.e(TAG,String.format("after run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
             }
         });
     }
@@ -230,10 +232,10 @@ public class PushSdkModule {
     }
 
     private void doRestartPushSdk() {
-        log.info("before run restartPushSdk");
+        Log.e(TAG,"before run restartPushSdk");
         mIsScheduleStarting = false;
         mLastRestartTimestampMs = System.currentTimeMillis();
-        log.warn("restart push sdk" +
+        Log.e(TAG,"restart push sdk" +
                 " , ip = " + mIp +
                 " , port = " + mPort +
                 " , appid = " + mAppid +
@@ -244,30 +246,30 @@ public class PushSdkModule {
         doNotifyClientConnectStatus(false);
         boolean needstart = false;
         if (mIp == null || mIp.isEmpty()) {
-            log.warn("Ip is null");
+            Log.e(TAG,"Ip is null");
         } else if (mPort <= 0) {
-            log.warn("Port is wrong. Port = " + mPort);
+            Log.e(TAG,"Port is wrong. Port = " + mPort);
         } else if (mAppid == null || mAppid.isEmpty()) {
-            log.warn("App id is null");
+            Log.e(TAG,"App id is null");
         } else {
             if (mManufactor == null || mManufactor.isEmpty()) {
-                log.warn("Manufactor is null");
+                Log.e(TAG,"Manufactor is null");
                 mManufactor = "";
             }
             if (mImei == null || mImei.isEmpty()) {
-                log.warn("Imei is null");
+                Log.e(TAG,"Imei is null");
                 mImei = "";
             } else {
                 needstart = true;
             }
             if (mMac == null || mMac.isEmpty()) {
-                log.warn("Mac is null");
+                Log.e(TAG,"Mac is null");
                 mMac = "";
             } else {
                 needstart = true;
             }
             if (mAndroidId == null || mAndroidId.isEmpty()) {
-                log.warn("AndroidId is null");
+                Log.e(TAG,"AndroidId is null");
                 mAndroidId = "";
             } else {
                 needstart = true;
@@ -278,9 +280,9 @@ public class PushSdkModule {
         }
         if (needstart) {
             libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
-            log.info("after run restartPushSdk");
+            Log.e(TAG,"after run restartPushSdk");
         } else {
-            log.info("retry restartPushSdk");
+            Log.e(TAG,"retry restartPushSdk");
             restartPushSdk();
         }
     }
@@ -289,13 +291,13 @@ public class PushSdkModule {
      * 停止接收push消息
      */
     public void stop() {
-        log.info("stop()");
+        Log.e(TAG,"stop()");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info("before run stop()");
+                Log.e(TAG,"before run stop()");
                 libpushclient.native_pushDisconnect();
-                log.info("after run stop()");
+                Log.e(TAG,"after run stop()");
             }
         });
 
@@ -316,27 +318,27 @@ public class PushSdkModule {
     }
 
     public void notifyClientConnectStatus(final boolean isConnected) {
-        log.info(String.format("notifyClientConnectStatus(%b)", isConnected));
+        Log.e(TAG, String.format("notifyClientConnectStatus(%b)", isConnected));
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info(String.format("before run notifyClientConnectStatus(%b)", isConnected));
+                Log.e(TAG,String.format("before run notifyClientConnectStatus(%b)", isConnected));
                 doNotifyClientConnectStatus(isConnected);
-                log.info(String.format("after run notifyClientConnectStatus(%b)", isConnected));
+                Log.e(TAG,String.format("after run notifyClientConnectStatus(%b)", isConnected));
             }
         });
 
     }
 
     private void doNotifyClientConnectStatus(final boolean isConnected) {
-        log.info(String.format("doNotifyClientConnectStatus(%b)", isConnected));
+        Log.e(TAG,String.format("doNotifyClientConnectStatus(%b)", isConnected));
 
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info(String.format("before run doNotifyClientConnectStatus(%b)", isConnected));
+                Log.e(TAG,String.format("before run doNotifyClientConnectStatus(%b)", isConnected));
 
-                log.warn("doNotifyClientConnectStatus" +
+                Log.e(TAG,"doNotifyClientConnectStatus" +
                         " , currentStatus = " + mIsConnected +
                         " , newStatus  = " + isConnected);
                 if (isConnected != mIsConnected || mIsFirst) {
@@ -351,18 +353,18 @@ public class PushSdkModule {
                     }
                 }
 
-                log.info(String.format("after run doNotifyClientConnectStatus(%b)", isConnected));
+                Log.e(TAG,String.format("after run doNotifyClientConnectStatus(%b)", isConnected));
             }
         });
 
     }
 
     public void notifyDeviceToken(final String deviceToken) {
-        log.info("notifyDeviceToken(deviceToken = " + deviceToken + ")");
+        Log.e(TAG,"notifyDeviceToken(deviceToken = " + deviceToken + ")");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info("before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                Log.e(TAG,"before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
                 mDevicetoken = deviceToken;
                 if (mPushCallback != null) {
                     try {
@@ -371,26 +373,26 @@ public class PushSdkModule {
                         e.printStackTrace();
                     }
                 }
-                log.info("after run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                Log.e(TAG,"after run notifyDeviceToken(deviceToken = " + deviceToken + ")");
             }
         });
     }
 
     @SuppressLint("DefaultLocale")
     public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final byte[] data, final String[] extraKeys, final String[] extraValues) {
-        log.info(String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
+        Log.e(TAG,String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                log.info(String.format("before run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
+                Log.e(TAG,String.format("before run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
                 if (mPushCallback != null) {
                     try {
                         mPushCallback.onPushMessage(mAppid, msgtype, contenttype, msgid, msgTime, data, extraKeys, extraValues);
                     } catch (Exception e) {
-                        log.info(e.toString());
+                        Log.e(TAG, "process push message error:"+e.toString());
                     }
                 }
-                log.info(String.format("after run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
+                Log.e(TAG,String.format("after run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d)", appId, msgtype, msgid, msgTime));
             }
         });
     }
