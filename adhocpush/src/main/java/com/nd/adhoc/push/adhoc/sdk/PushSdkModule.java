@@ -142,34 +142,8 @@ public class PushSdkModule {
      */
     @SuppressLint("DefaultLocale")
     public void startPushSdk(final Context context, final String appid, final String appKey, final String ip, final int port, final IPushSdkCallback pushCallback) {
-        final String packageName = context.getPackageName();
-        String sdCardPath = StorageUtil.getSdCardPath();
-        if (null == sdCardPath || sdCardPath.isEmpty()) {
-            LogConfigurator logConfigurator = new LogConfigurator();
-            logConfigurator.setRootLevel(Level.ALL);
-            logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
-            logConfigurator.setMaxFileSize(1024 * 1024 * 50);
-            logConfigurator.setMaxBackupSize(5);
-            logConfigurator.setImmediateFlush(true);
-            logConfigurator.setUseFileAppender(false);
-            logConfigurator.setUseLogCatAppender(true);
-            logConfigurator.configure();
-            log.warn("no sdcard for log");
-        } else {
-            String logPath = sdCardPath + "/" + packageName + "/adhoclog/";
-            String log4jLogPath = logPath + "push.log";
-            LogConfigurator logConfigurator = new LogConfigurator();
-            logConfigurator.setFileName(log4jLogPath);
-            logConfigurator.setRootLevel(Level.ALL);
-            logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
-            logConfigurator.setMaxFileSize(1024 * 1024 * 50);
-            logConfigurator.setMaxBackupSize(5);
-            logConfigurator.setImmediateFlush(true);
-            logConfigurator.setUseFileAppender(true);
-            logConfigurator.setUseLogCatAppender(true);
-            logConfigurator.configure();
-            log.warn("logpath " + log4jLogPath);
-        }
+        setupLogConfigurator(context);
+
         Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
         executorService.submit(new Runnable() {
             @Override
@@ -181,6 +155,40 @@ public class PushSdkModule {
         });
     }
 
+    private void setupLogConfigurator(Context pContext){
+        try {
+            final String packageName = pContext.getPackageName();
+            String sdCardPath = StorageUtil.getSdCardPath();
+            if (null == sdCardPath || sdCardPath.isEmpty()) {
+                LogConfigurator logConfigurator = new LogConfigurator();
+                logConfigurator.setRootLevel(Level.ALL);
+                logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
+                logConfigurator.setMaxFileSize(1024 * 1024 * 50);
+                logConfigurator.setMaxBackupSize(5);
+                logConfigurator.setImmediateFlush(true);
+                logConfigurator.setUseFileAppender(false);
+                logConfigurator.setUseLogCatAppender(true);
+                logConfigurator.configure();
+                log.warn("no sdcard for log");
+            } else {
+                String logPath = sdCardPath + "/" + packageName + "/adhoclog/";
+                String log4jLogPath = logPath + "push.log";
+                LogConfigurator logConfigurator = new LogConfigurator();
+                logConfigurator.setFileName(log4jLogPath);
+                logConfigurator.setRootLevel(Level.ALL);
+                logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
+                logConfigurator.setMaxFileSize(1024 * 1024 * 50);
+                logConfigurator.setMaxBackupSize(5);
+                logConfigurator.setImmediateFlush(true);
+                logConfigurator.setUseFileAppender(true);
+                logConfigurator.setUseLogCatAppender(true);
+                logConfigurator.configure();
+                log.warn("logpath " + log4jLogPath);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
      * 设置负载均衡服务
      *
