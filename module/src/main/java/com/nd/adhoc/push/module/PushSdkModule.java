@@ -13,7 +13,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -130,35 +129,35 @@ public class PushSdkModule {
         return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
     }
 
-    /**
-     * 发送上行消息
-     *
-     * @param msgid 消息ID
-     * @param ttlSeconds 过期时间
-     * @param contentType 消息类型
-     * @param content 消息内容
-     * @return 0 成功
-     *         非0 失败
-     */
-    @SuppressLint("DefaultLocale")
-    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
-        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
-    }
-
-    /**
-     * 发送上行消息
-     *
-     * @param msgid 消息ID
-     * @param ttlSeconds 过期时间
-     * @param contentType 消息类型
-     * @param content 消息内容
-     * @return 0 成功
-     *         非0 失败
-     */
-    @SuppressLint("DefaultLocale")
-    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
-        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
-    }
+//    /**
+//     * 发送上行消息
+//     *
+//     * @param msgid 消息ID
+//     * @param ttlSeconds 过期时间
+//     * @param contentType 消息类型
+//     * @param content 消息内容
+//     * @return 0 成功
+//     *         非0 失败
+//     */
+//    @SuppressLint("DefaultLocale")
+//    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+//        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
+//    }
+//
+//    /**
+//     * 发送上行消息
+//     *
+//     * @param msgid 消息ID
+//     * @param ttlSeconds 过期时间
+//     * @param contentType 消息类型
+//     * @param content 消息内容
+//     * @return 0 成功
+//     *         非0 失败
+//     */
+//    @SuppressLint("DefaultLocale")
+//    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+//        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
+//    }
 
     /**
      * 开始接收Push消息
