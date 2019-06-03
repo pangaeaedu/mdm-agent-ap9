@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
-import com.nd.adhoc.push.adhoc.utils.HttpUtil;
 import com.nd.adhoc.push.core.BasePushChannel;
 import com.nd.adhoc.push.core.IPushChannel;
 import com.nd.adhoc.push.core.IPushChannelConnectListener;
@@ -23,15 +22,11 @@ import com.nd.adhoc.push.core.PushRecvDataImpl;
 import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.android.adhoc.basic.log.CrashAnalytics;
-import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.mdm.biz.env.MdmEvnFactory;
 import com.nd.android.mdm.util.cmd.CmdUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.android.serviceloader.annotation.Service;
 import com.tbruyelle.rxpermissions.RxPermissions;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.UUID;
 
@@ -191,26 +186,6 @@ public class AdhocPushChannel extends BasePushChannel {
         public void onPushStatus(final boolean isConnected) {
             Log.e(TAG, "onPushStatus :"+isConnected);
             notifyConnectStatus(isConnected);
-
-            //  郭文要求
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (isConnected) {
-                        try {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("stock_id", getUid());
-                            String content = jsonObject.toString();
-                            String env = MdmEvnFactory.getInstance().getCurEnvironment().getUrl();
-                            HttpUtil.post(env, content, getPushID());
-                        } catch (JSONException e) {
-                            Logger.e(TAG, "assistant service send stock failed:" + e.getMessage());
-                        } catch (Exception e) {
-                            Logger.e(TAG, "assistant service send stock failed:" + e.getMessage());
-                        }
-                    }
-                }
-            }).start();
         }
 
         @Override
