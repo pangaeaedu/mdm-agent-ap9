@@ -405,4 +405,8 @@ public class PushSdkModule {
         });
     }
 
+    public void notifyPushUpstreamSent(String pMsgID, int pErrorCode){
+        Log.e(TAG,String.format("notifyPushUpstreamSent(pMsgID=%s, pErrorCode=%d)", pMsgID, pErrorCode));
+    }
+
 }

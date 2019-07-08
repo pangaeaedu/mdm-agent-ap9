@@ -47,6 +47,10 @@ public class libpushclient {
         PushSdkModule.getInstance().notifyPushMessage(appId, msgtype, contenttype, msgid, msgTime, data, extraKeys, extarValues);
     }
 
+    public static void onPushUpstreamSent(String msgid, int errCode) {
+        PushSdkModule.getInstance().notifyPushUpstreamSent(msgid, errCode);
+    }
+
     public static void onPushLoginResult(String appId, int errCode, String errMsg) {
         PushSdkModule.getInstance().notifyClientConnectStatus(errCode==0);
     }
