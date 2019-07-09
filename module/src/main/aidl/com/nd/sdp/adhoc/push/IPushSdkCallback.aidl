@@ -21,6 +21,15 @@ interface IPushSdkCallback {
     byte[] onPushMessage(String appId, int msgtype, inout byte[] contenttype, long msgid, long msgTime, inout byte[] data, inout String []extraKeys, inout String []extraValues);
 
     /**
+     * 上行消息发送完成通知
+     *
+     * @param msgId
+     * @param content
+     */
+    void onPushUpstreamSent(String msgId, int errCode);
+
+
+    /**
      * 客户端与push服务器连接状态回调
      * @param isConnected  是否连接成功
      */

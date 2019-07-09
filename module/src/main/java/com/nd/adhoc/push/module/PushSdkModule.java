@@ -345,6 +345,24 @@ public class PushSdkModule {
         return mDevicetoken;
     }
 
+    public void notifyPushUpstreamSent(final String msgid, final int errCode) {
+        log.info(String.format("notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                log.info(String.format("before run notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+                if (mPushCallback != null) {
+                    try {
+                        mPushCallback.onPushUpstreamSent(msgid, errCode);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                log.info(String.format("after run notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+            }
+        });
+    }
+
     public void notifyClientConnectStatus(final boolean isConnected) {
         log.info(String.format("notifyClientConnectStatus(%b)", isConnected));
         executorService.submit(new Runnable() {
