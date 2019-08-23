@@ -16,6 +16,8 @@ public interface IPushChannel {
     Observable<Boolean> start();
     Observable<Boolean> stop();
 
+    void setAutoStart(boolean pStart);
+
     String getPushID();
 
     PushConnectStatus getCurrentStatus();

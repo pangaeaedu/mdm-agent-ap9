@@ -70,6 +70,11 @@ public class AdhocPushChannel extends BasePushChannel {
     }
 
     @Override
+    public void setAutoStart(boolean pStart) {
+        PushSdkModule.getInstance().setAutoStart(pStart);
+    }
+
+    @Override
     public Observable<Boolean> start() {
         if (getCurrentStatus() == PushConnectStatus.Connected) {
             PushSdkModule.getInstance().stop();

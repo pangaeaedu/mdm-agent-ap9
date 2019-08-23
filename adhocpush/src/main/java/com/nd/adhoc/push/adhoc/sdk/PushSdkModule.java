@@ -59,6 +59,8 @@ public class PushSdkModule {
 
     private long mLastRestartTimestampMs = 0;
 
+    private boolean mAutoStart = true;
+
     private static long RESTART_INTERVAL_MS = 5000;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -239,6 +241,11 @@ public class PushSdkModule {
         });
     }
 
+    public void setAutoStart(boolean pStart){
+        Log.e(TAG, "setAutoStart:"+pStart);
+        mAutoStart = pStart;
+    }
+
     private void doRestartPushSdk() {
         Log.e(TAG,"before run restartPushSdk");
         mIsScheduleStarting = false;
@@ -287,8 +294,10 @@ public class PushSdkModule {
             mAppKey = "";
         }
         if (needstart) {
-            libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
-            Log.e(TAG,"after run restartPushSdk");
+            if(mAutoStart) {
+                libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+                Log.e(TAG, "after run restartPushSdk");
+            }
         } else {
             Log.e(TAG,"retry restartPushSdk");
             restartPushSdk();
