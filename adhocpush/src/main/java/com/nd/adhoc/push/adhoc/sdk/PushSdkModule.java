@@ -295,7 +295,8 @@ public class PushSdkModule {
         }
         if (needstart) {
             if(mAutoStart) {
-                libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+                libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei,
+                        mMac, "", mReconnectIntervalMs);
                 Log.e(TAG, "after run restartPushSdk");
             }
         } else {
