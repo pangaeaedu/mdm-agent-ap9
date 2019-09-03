@@ -3,11 +3,11 @@ package com.nd.adhoc.push.adhoc.utils;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
-import com.nd.android.adhoc.basic.util.system.AdhocDeviceUtil;
 
 import org.apache.log4j.Logger;
 
@@ -19,26 +19,8 @@ import org.apache.log4j.Logger;
 public class DeviceUtil {
     private static Logger log = Logger.getLogger(PushSdkModule.class.getSimpleName());
 
-    public static String getMac(Context context) {
-//        String mac = null;
-//        while (true) {
-//            try {
-//                WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-//                WifiInfo info = wifi.getConnectionInfo();
-//                mac = info.getMacAddress();
-//                if (mac != null && !mac.isEmpty()) {
-//                    mac = mac.replace(":", "");
-//                    log.warn("get mac  " + mac);
-//                    break;
-//                }
-//                log.warn("get mac failed, will retry after 1 second");
-//                Thread.sleep(1000);
-//            } catch (Exception e) {
-//                log.warn("get mac exception " + e.toString());
-//            }
-//        }
-//        return mac;
-        return AdhocDeviceUtil.getWifiMac(context);
+    public static String getMac(@NonNull Context context) {
+        return PushStoredDeviceInfoUtils.getDeviceMac(context);
     }
 
     private static String sPseudoID = "35" + //we make this look like a valid IMEI

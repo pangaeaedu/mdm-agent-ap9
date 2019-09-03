@@ -23,6 +23,8 @@ dependencies {
         api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
     }
 
+    api("com.nd.android.adhoc.basic:adhoc_util_system:$adhoc_basic_version")
+
     api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
 
     api("com.nd.android.adhoc.basic:adhoc_basic_log:$adhoc_basic_version")

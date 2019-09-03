@@ -20,7 +20,7 @@ buildscript {
 }
 
 ext {
-    adhoc_basic_version = '1.1.205.7481cbd-hyk0.6.7.0opt-SNAPSHOT'
+    adhoc_basic_version = '1.3.408.4b3d55f-yhqmultiuser-SNAPSHOT'
 
     mdm_biz_version = '1.1.257.43ecbeb-yhq0.6.6.0reengineering-SNAPSHOT'
     device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
