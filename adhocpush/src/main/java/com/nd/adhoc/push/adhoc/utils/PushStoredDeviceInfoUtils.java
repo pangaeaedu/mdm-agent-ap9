@@ -3,11 +3,13 @@ package com.nd.adhoc.push.adhoc.utils;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.nd.android.adhoc.basic.util.system.AdhocDeviceUtil;
 
 public class PushStoredDeviceInfoUtils {
 
+    private static final String TAG = "PushUtils";
     private static String mDeviceMac = "";
 
     // 这个mac是取来给Push当 push id用的，先取有线的，再取无线的，只要取到一个，就存起来
@@ -20,6 +22,7 @@ public class PushStoredDeviceInfoUtils {
         PushSpConfigFactory configFactory = PushSpConfigFactory.getInstance();
         mDeviceMac = configFactory.getDeviceMac(pContext);
         if(!TextUtils.isEmpty(mDeviceMac)){
+            Log.d(TAG, "use cached device mac:"+mDeviceMac);
             return mDeviceMac;
         }
 
@@ -27,6 +30,7 @@ public class PushStoredDeviceInfoUtils {
         // 因为我们曾经在ap7上遇到过无线网卡可更换的情况
         mDeviceMac = AdhocDeviceUtil.getEthernetMac();
         if(!TextUtils.isEmpty(mDeviceMac)){
+            Log.d(TAG, "use device lan mac:"+mDeviceMac);
             configFactory.saveDeviceMac(pContext, mDeviceMac);
             return mDeviceMac;
         }
@@ -34,10 +38,12 @@ public class PushStoredDeviceInfoUtils {
         // 取不到有线，取wifi Mac
         mDeviceMac = AdhocDeviceUtil.getWifiMac(pContext);
         if(!TextUtils.isEmpty(mDeviceMac)){
+            Log.d(TAG, "use device wifi mac:"+mDeviceMac);
             configFactory.saveDeviceMac(pContext, mDeviceMac);
             return mDeviceMac;
         }
 
+        Log.d(TAG, "lan mac and wifi mac both not found");
         return "";
     }
 }

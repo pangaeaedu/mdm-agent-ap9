@@ -294,10 +294,15 @@ public class PushSdkModule {
             mAppKey = "";
         }
         if (needstart) {
-            if(mAutoStart) {
+            if (mAutoStart) {
+                Log.d(TAG, "native_pushLogin start with IP:" + mIp + " port:" + mPort
+                        + " appID:" + mAppid + " appKey:" + mAppKey + " manufactor:" + mManufactor
+                        + " imei:" + mImei + " mac:" + mMac);
                 libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei,
                         mMac, "", mReconnectIntervalMs);
                 Log.e(TAG, "after run restartPushSdk");
+            } else {
+                Log.d(TAG, "auto start is false, not calling native_pushLogin");
             }
         } else {
             Log.e(TAG,"retry restartPushSdk");
