@@ -76,9 +76,9 @@ public class AdhocPushChannel extends BasePushChannel {
 
     @Override
     public Observable<Boolean> start() {
-        if (getCurrentStatus() == PushConnectStatus.Connected) {
-            PushSdkModule.getInstance().stop();
-        }
+//        if (getCurrentStatus() == PushConnectStatus.Connected) {
+//            PushSdkModule.getInstance().stop();
+//        }
 
 //        CrashAnalytics.INSTANCE.reportException(new Exception("AdhocPushChannel start"));
         Log.e(TAG, "AdhocPushChannel start");

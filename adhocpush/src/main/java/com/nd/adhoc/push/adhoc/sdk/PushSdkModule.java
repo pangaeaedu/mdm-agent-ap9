@@ -315,6 +315,7 @@ public class PushSdkModule {
      */
     public void stop() {
         Log.e(TAG,"stop()");
+        mIsConnected = false;
         executorService.submit(new Runnable() {
             @Override
             public void run() {
