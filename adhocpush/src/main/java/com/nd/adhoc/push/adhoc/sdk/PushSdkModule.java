@@ -424,6 +424,13 @@ public class PushSdkModule {
 
     public void notifyPushUpstreamSent(String pMsgID, int pErrorCode){
         Log.e(TAG,String.format("notifyPushUpstreamSent(pMsgID=%s, pErrorCode=%d)", pMsgID, pErrorCode));
+        if (mPushCallback != null) {
+            try {
+                mPushCallback.notifyMessageSentResult(pMsgID, pErrorCode);
+            } catch (Exception e) {
+                Log.e(TAG, "notifyMessageSentResult message error:"+e.toString());
+            }
+        }
     }
 
 }

@@ -30,4 +30,7 @@ interface IPushSdkCallback {
      * Push 服務被系統回收, 需要上層從新 start
      */
     void onPushShutdown();
+
+    //通知消息发送结果
+    void notifyMessageSentResult(String pMsgID, int pErrorCode);
 }
