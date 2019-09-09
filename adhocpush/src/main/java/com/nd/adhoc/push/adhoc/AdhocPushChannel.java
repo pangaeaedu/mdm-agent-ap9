@@ -197,6 +197,18 @@ public class AdhocPushChannel extends BasePushChannel {
         public void onPushShutdown() throws RemoteException {
             start();
         }
+
+        @Override
+        public void notifyMessageSentResult(String pMsgID, int pErrorCode) throws RemoteException {
+            try {
+                for (IPushChannelDataListener listener : mDataListeners) {
+                    listener.onMessageSendResult(pMsgID, pErrorCode);
+                }
+            } catch (Exception e) {
+                CrashAnalytics.INSTANCE.reportException(e);
+                e.printStackTrace();
+            }
+        }
     };
 
     public String getUid() {
