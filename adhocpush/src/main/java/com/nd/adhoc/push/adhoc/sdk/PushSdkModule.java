@@ -130,7 +130,14 @@ public class PushSdkModule {
      */
     @SuppressLint("DefaultLocale")
     public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
-        return libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
+        int ret = libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
+
+        if(ret != 0){
+            Log.e(TAG, "sendUpStreamMsg failed msgid:"+msgid+" ret:"+ret);
+            notifyPushUpstreamSent(msgid, ret);
+        }
+
+        return ret;
     }
 
     /**
