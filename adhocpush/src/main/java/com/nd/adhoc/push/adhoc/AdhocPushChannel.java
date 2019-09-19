@@ -6,9 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
@@ -22,11 +24,11 @@ import com.nd.adhoc.push.core.PushRecvDataImpl;
 import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.android.adhoc.basic.log.CrashAnalytics;
+import com.nd.android.adhoc.basic.util.permission.AdhocRxPermissions;
 import com.nd.android.mdm.biz.env.MdmEvnFactory;
 import com.nd.android.mdm.util.cmd.CmdUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.android.serviceloader.annotation.Service;
-import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.util.UUID;
 
@@ -83,31 +85,39 @@ public class AdhocPushChannel extends BasePushChannel {
 //        CrashAnalytics.INSTANCE.reportException(new Exception("AdhocPushChannel start"));
         Log.e(TAG, "AdhocPushChannel start");
         final Context context = AdhocBasicConfig.getInstance().getAppContext();
-        return RxPermissions.getInstance(context)
-                .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .map(new Func1<Boolean, Boolean>() {
-                    @Override
-                    public Boolean call(Boolean pBoolean) {
-                        if (pBoolean) {
-                            String pushSrvIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
-                            int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
 
-                            startAdhocPush(context, "mdm", null, pushSrvIp,
-                                    pushSrvPort, mPushSdkCallback);
-                            return true;
-                        }
+        if (ActivityCompat.checkSelfPermission(AdhocBasicConfig.getInstance().getAppContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            startAdhocPush(context, "mdm", null, mPushSdkCallback);
+            return Observable.just(true);
+        } else {
+            return AdhocRxPermissions.getInstance(context)
+                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .map(new Func1<Boolean, Boolean>() {
+                        @Override
+                        public Boolean call(Boolean pBoolean) {
+                            if (pBoolean) {
+
+                                startAdhocPush(context, "mdm", null, mPushSdkCallback);
+                                return true;
+                            }
 
 //                        CrashAnalytics.INSTANCE
 //                                .reportException(new Exception("start adhoc push failed, do not have write external " +
 //                                "storage permission"));
-                        Log.e(TAG, "start adhoc push failed, do not have write external storage permission");
-                        return false;
-                    }
-                });
+                            Log.e(TAG, "start adhoc push failed, do not have write external storage permission");
+                            return false;
+                        }
+                    });
+        }
+
     }
 
-    private void startAdhocPush(final Context pContext, String appid, String appKey,
-                                String ip, int port, IPushSdkCallback pushCallback) {
+
+    private void startAdhocPush(final Context pContext, String appid, String appKey, IPushSdkCallback pushCallback) {
+
+        String pushSrvIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
+        int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
         try {
             if (pContext != null) {
                 IntentFilter filter = new IntentFilter();
@@ -118,9 +128,9 @@ public class AdhocPushChannel extends BasePushChannel {
             CrashAnalytics.INSTANCE.reportException(e);
         }
 
-        Log.e(TAG, "startAdhocPush appid:"+appid+" appKey:"+appKey
-                +" ip:"+ip+" port:"+port);
-        PushSdkModule.getInstance().startPushSdk(pContext, appid, appKey, ip, port, pushCallback);
+        Log.e(TAG, "startAdhocPush appid:" + appid + " appKey:" + appKey
+                + " ip:" + pushSrvIp + " port:" + pushSrvPort);
+        PushSdkModule.getInstance().startPushSdk(pContext, appid, appKey, pushSrvIp, pushSrvPort, pushCallback);
     }
 
     @Override

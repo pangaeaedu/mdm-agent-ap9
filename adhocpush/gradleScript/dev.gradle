@@ -15,7 +15,9 @@ dependencies {
     api 'org.apache.commons:commons-lang3:3.6'
     api 'commons-net:commons-net:3.5'
 
-    api 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0'
+//    api 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0'
+
+    api"com.nd.android.adhoc.basic:adhoc_util_permission:$adhoc_basic_version"
 
     try {
         api project(':mdm_env')
