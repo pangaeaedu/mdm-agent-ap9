@@ -2,18 +2,17 @@ package com.nd.adhoc.push.adhoc.sdk;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
-import com.nd.adhoc.push.adhoc.utils.StorageUtil;
 import com.nd.adhoc.push.client.libpushclient;
+import com.nd.android.adhoc.basic.util.storage.AdhocStorageUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,13 +79,15 @@ public class PushSdkModule {
      */
     private void doStartPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
-            final String packageName = context.getPackageName();
-            File sdCard = Environment.getExternalStorageDirectory();
-            if (null == sdCard) {
-                sdCard = Environment.getDownloadCacheDirectory();
-            }
+//            final String packageName = context.getPackageName();
+//            File sdCard = Environment.getExternalStorageDirectory();
+//            if (null == sdCard) {
+//                sdCard = Environment.getDownloadCacheDirectory();
+//            }
+
+            String sdCard = AdhocStorageUtil.getSDCardFilesDir(context);
             if (null != sdCard) {
-                String logPath = sdCard + "/" + packageName + "/adhoclog/";
+                String logPath = sdCard + "/log/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
@@ -166,9 +167,10 @@ public class PushSdkModule {
 
     private void setupLogConfigurator(Context pContext){
         try {
-            final String packageName = pContext.getPackageName();
-            String sdCardPath = StorageUtil.getSdCardPath();
-            if (null == sdCardPath || sdCardPath.isEmpty()) {
+
+            String sdCard = AdhocStorageUtil.getSDCardFilesDir(pContext);
+
+            if (TextUtils.isEmpty(sdCard)) {
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setRootLevel(Level.ALL);
                 logConfigurator.setFilePattern("%d %-5p [%c{2}] %m%n");
@@ -180,7 +182,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("no sdcard for log");
             } else {
-                String logPath = sdCardPath + "/" + packageName + "/adhoclog/";
+                String logPath = sdCard + "/log/adhoclog/";
                 String log4jLogPath = logPath + "push.log";
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setFileName(log4jLogPath);

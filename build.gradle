@@ -20,7 +20,7 @@ buildscript {
 }
 
 ext {
-    adhoc_basic_version = '1.5.422.df48359-yhqmultiuser-SNAPSHOT'
+    adhoc_basic_version = '1.6.434.bc2a578-hyksupport28-SNAPSHOT'
 
     mdm_biz_version = '1.1.257.43ecbeb-yhq0.6.6.0reengineering-SNAPSHOT'
     device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
@@ -28,6 +28,10 @@ ext {
     device_command_version = '1.1.87.24dfc01-hyk0.6.6.0opt-SNAPSHOT'
     location_verison = '1.0.13.7af56f3'
     adhoc_sdk_version = '1.2.19.2078-develop-SNAPSHOT'
+
+
+    // push版本现在由杨宏群负责发布
+    adhoc_push_util_version = '0.3.25.103.1dd4e37'
 }
 
 allprojects {
