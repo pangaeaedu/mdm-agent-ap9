@@ -231,6 +231,7 @@ public class PushSdkModule {
             public void run() {
                 long lastRestartInterval = SystemClock.elapsedRealtime()-mLastRestartTimestampMs;
                 long scheduleInterval = RESTART_INTERVAL_MS-lastRestartInterval;
+                log.info("restartPushSdk , scheduleInterval:"+scheduleInterval);
                 if (scheduleInterval>0) {
                     if (mIsScheduleStarting) {
                         log.info("restartPushSdk ignored , already scheduled");
