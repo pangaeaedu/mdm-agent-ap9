@@ -2,6 +2,7 @@ package com.nd.adhoc.push.adhoc.sdk;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -228,7 +229,7 @@ public class PushSdkModule {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                long lastRestartInterval = System.currentTimeMillis()-mLastRestartTimestampMs;
+                long lastRestartInterval = SystemClock.elapsedRealtime()-mLastRestartTimestampMs;
                 long scheduleInterval = RESTART_INTERVAL_MS-lastRestartInterval;
                 if (scheduleInterval>0) {
                     if (mIsScheduleStarting) {
@@ -258,7 +259,7 @@ public class PushSdkModule {
     private void doRestartPushSdk() {
         Log.e(TAG,"before run restartPushSdk");
         mIsScheduleStarting = false;
-        mLastRestartTimestampMs = System.currentTimeMillis();
+        mLastRestartTimestampMs = SystemClock.elapsedRealtime();
         Log.e(TAG,"restart push sdk" +
                 " , ip = " + mIp +
                 " , port = " + mPort +
