@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
@@ -88,7 +89,7 @@ public class AdhocPushChannel extends BasePushChannel {
 
         if (ActivityCompat.checkSelfPermission(AdhocBasicConfig.getInstance().getAppContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            startAdhocPush(context, "mdm", null, mPushSdkCallback);
+            startAdhocPush(context, mPushSdkCallback);
             return Observable.just(true);
         } else {
             return AdhocRxPermissions.getInstance(context)
@@ -98,7 +99,7 @@ public class AdhocPushChannel extends BasePushChannel {
                         public Boolean call(Boolean pBoolean) {
                             if (pBoolean) {
 
-                                startAdhocPush(context, "mdm", null, mPushSdkCallback);
+                                startAdhocPush(context, mPushSdkCallback);
                                 return true;
                             }
 
@@ -114,10 +115,13 @@ public class AdhocPushChannel extends BasePushChannel {
     }
 
 
-    private void startAdhocPush(final Context pContext, String appid, String appKey, IPushSdkCallback pushCallback) {
+    private void startAdhocPush(final Context pContext, IPushSdkCallback pushCallback) {
 
         String pushSrvIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
         int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
+
+        String pushAppID = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppId();
+        String pushAppKey = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppKey();
         try {
             if (pContext != null) {
                 IntentFilter filter = new IntentFilter();
@@ -128,9 +132,16 @@ public class AdhocPushChannel extends BasePushChannel {
             CrashAnalytics.INSTANCE.reportException(e);
         }
 
-        Log.e(TAG, "startAdhocPush appid:" + appid + " appKey:" + appKey
+        Log.e(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey
                 + " ip:" + pushSrvIp + " port:" + pushSrvPort);
-        PushSdkModule.getInstance().startPushSdk(pContext, appid, appKey, pushSrvIp, pushSrvPort, pushCallback);
+        if (TextUtils.isEmpty(pushAppKey)) {
+            PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, null, pushSrvIp,
+                    pushSrvPort, pushCallback);
+        } else {
+            PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushSrvIp,
+                    pushSrvPort, pushCallback);
+        }
+
     }
 
     @Override
@@ -177,7 +188,7 @@ public class AdhocPushChannel extends BasePushChannel {
     private IPushSdkCallback.Stub mPushSdkCallback = new IPushSdkCallback.Stub() {
         @Override
         public void onPushDeviceToken(String deviceToken) {
-            Log.e(TAG, "onPushDeviceToken :"+deviceToken);
+            Log.e(TAG, "onPushDeviceToken :" + deviceToken);
         }
 
         @Override
@@ -199,7 +210,7 @@ public class AdhocPushChannel extends BasePushChannel {
 
         @Override
         public void onPushStatus(final boolean isConnected) {
-            Log.e(TAG, "onPushStatus :"+isConnected);
+            Log.e(TAG, "onPushStatus :" + isConnected);
             notifyConnectStatus(isConnected);
         }
 
