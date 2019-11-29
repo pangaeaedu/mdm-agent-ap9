@@ -11,7 +11,6 @@ import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
@@ -134,13 +133,8 @@ public class AdhocPushChannel extends BasePushChannel {
 
         Log.e(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey
                 + " ip:" + pushSrvIp + " port:" + pushSrvPort);
-        if (TextUtils.isEmpty(pushAppKey)) {
-            PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, null, pushSrvIp,
-                    pushSrvPort, pushCallback);
-        } else {
-            PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushSrvIp,
-                    pushSrvPort, pushCallback);
-        }
+        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushSrvIp,
+                pushSrvPort, pushCallback);
 
     }
 
