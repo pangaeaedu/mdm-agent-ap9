@@ -183,6 +183,11 @@ public class AdhocPushChannel extends BasePushChannel {
         @Override
         public void onPushDeviceToken(String deviceToken) {
             Log.e(TAG, "onPushDeviceToken :" + deviceToken);
+            for (IPushChannelConnectListener listener : mConnectListeners) {
+                if (listener instanceof IAdhocPushChannelConnectListener) {
+                    ((IAdhocPushChannelConnectListener) listener).onPushDeviceToken(deviceToken);
+                }
+            }
         }
 
         @Override
