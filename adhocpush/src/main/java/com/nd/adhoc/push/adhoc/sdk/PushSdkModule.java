@@ -14,6 +14,7 @@ import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,12 @@ public class PushSdkModule {
 
     private long mLastRestartTimestampMs = 0;
 
+    private String packageName = "";
+
+    private String manufactorName = "";
+
+    private String manufactorToken = "";
+	
     private boolean mAutoStart = true;
 
     private static long RESTART_INTERVAL_MS = 5000;
@@ -123,6 +130,7 @@ public class PushSdkModule {
     /**
      * 发送上行消息
      *
+     * @param topic 主题 ，默认为空
      * @param msgid 消息ID
      * @param ttlSeconds 过期时间
      * @param contentType 消息类型
@@ -131,11 +139,11 @@ public class PushSdkModule {
      *         非0 失败
      */
     @SuppressLint("DefaultLocale")
-    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
-        int ret = libpushclient.native_sendUpStreamMsg(msgid, ttlSeconds, contentType, content);
+    public int sendUpStreamMsg(String topic, String msgid, long ttlSeconds, String contentType, String content) {
+        int ret = libpushclient.native_sendUpStreamMsg(topic, msgid, ttlSeconds, contentType, content);
 
         if(ret != 0){
-            Log.e(TAG, "sendUpStreamMsg failed msgid:"+msgid+" ret:"+ret);
+            Log.e(TAG, "sendUpStreamMsg failed topic:"+topic+"msgid:"+msgid+" ret:"+ret);
             notifyPushUpstreamSent(msgid, ret);
         }
 
@@ -201,24 +209,142 @@ public class PushSdkModule {
             e.printStackTrace();
         }
     }
+
     /**
-     * 设置负载均衡服务
+     * 设置厂商推送通道（在PushLogin之前调用）
      *
-     * @param host 负载均衡服务地址
-     * @param port 负载均衡服务端口
+     * @param packageName 在这个厂商的包名
+     * @param manufactorName 厂商名
+     * @param manufactorToken 厂商分配的设备Token
      */
-    @SuppressLint("DefaultLocale")
-    public void setLoadBalancer(final String host, final int port) {
-        log.info(String.format("setLoadBalancer(host=%s, port=%d)", host, port));
+    public synchronized void setMFChannel(final String packageName, final String manufactorName, final String manufactorToken) {
+        log.info(String.format("setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
+        this.packageName = packageName;
+        this.manufactorName = manufactorName;
+        this.manufactorToken = manufactorToken;
         executorService.submit(new Runnable() {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                log.info(String.format("before run setLoadBalancer(host=%s, port=%d)", host, port));
-                libpushclient.native_pushSetLoadBalancer(host, port);
-                log.info(String.format("after run setLoadBalancer(host=%s, port=%d)", host, port));
+                log.info(String.format("before run setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
+                libpushclient.native_setMFChannel(packageName, manufactorName, manufactorToken);
+                log.info(String.format("after run setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
             }
         });
+    }
+
+    /**
+     * 设置负载均衡服务
+     *
+     * @param url 负载均衡服务地址
+     */
+    @SuppressLint("DefaultLocale")
+    public void setLoadBalancer(final String url) {
+        log.info(String.format("setLoadBalancer(url=%s)", url));
+        executorService.submit(new Runnable() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void run() {
+                log.info(String.format("before run setLoadBalancer(url=%s)", url));
+                libpushclient.native_pushSetLoadBalancer(url);
+                log.info(String.format("after run setLoadBalancer(url=%s)", url));
+            }
+        });
+    }
+
+    /**
+     * 订阅主题， 注意该请求如果失败，会不断重试
+     */
+    public void subscribe(Map<String, PushQoS> topics) {
+        String[] topicsArray = new String[topics.size()];
+        int[] qosArray = new int[topics.size()];
+        int index = 0;
+        for (Map.Entry<String,PushQoS> topic : topics.entrySet()) {
+            topicsArray[index] = topic.getKey();
+            qosArray[index] = topic.getValue().getIntValue();
+            index++;
+        }
+        libpushclient.native_pushSubscribe(topicsArray, qosArray, topics.size());
+    }
+
+    /**
+     * 取消订阅某几个主题， 注意该请求如果失败，会不断重试
+     */
+    public void unsubscribe(String[] topics) {
+        libpushclient.native_pushUnsubscribe(topics, topics.length);
+    }
+
+    /**
+     * 取消订阅所有主题， 注意该请求如果失败，会不断重试
+     */
+    public void unsubscribeAll() {
+        libpushclient.native_pushUnsubscribeAll();
+    }
+
+    /**
+     * 增加客户端的标签， 注意该请求如果失败，会不断重试
+     *
+     * @param tags Map<String,String>  ，比如 <省份,福建>
+     */
+    public void addTags(Map<String,String> tags) {
+        String[] keys = new String[tags.size()];
+        String[] values = new String[tags.size()];
+        int index = 0;
+        for (Map.Entry<String,String> tag : tags.entrySet()) {
+            keys[index] = tag.getKey();
+            values[index] = tag.getValue();
+            index++;
+        }
+        libpushclient.native_pushAddTags(keys, values, tags.size());
+    }
+
+    /**
+     * 删除本客户端的标签， 注意该请求如果失败，会不断重试
+     *
+     * @param keys 需要删除的标签 Key
+     */
+    public void removeTags(String []keys) {
+        libpushclient.native_pushRemoveTags(keys, keys.length);
+    }
+
+    /**
+     * 删除本客户端的所有标签， 注意该请求如果失败，会不断重试
+     */
+    public void removeAllTags() {
+        libpushclient.native_pushRemoveAllTags();
+    }
+
+    /**
+     * 设置别名，最多可能会阻塞1秒，注意该请求如果失败，会在下次登陆成功后重试，但程序重启后不会
+     *
+     * @return  0               表示成功
+     *          非零值           错误码, 即使返回错误码， 也有可能成功， 因为等待服务端回应只等待1秒， 服务端仍然有可能成功
+     */
+    public int setAlias(String alias) {
+        return libpushclient.native_pushSetAlias(alias);
+    }
+
+    /**
+     * 更新影子， 注意该请求如果失败，会不断重试
+     */
+    public int reportShadow(PushShadowMode mode, String reported) {
+        return libpushclient.native_pushReportShadow(mode.getIntValue(), reported);
+    }
+
+    /**
+     * 获取影子，获取后通过 OnPushShadowUpdated 函数返回
+     *
+     * @param version 本地拥有的版本， 不清楚可以传0
+     */
+    public synchronized void getShadow(PushShadowMode mode, int version) {
+        libpushclient.native_pushGetShadow(mode.getIntValue(), version);
+    }
+
+    /**
+     * 删除影子， 注意该请求如果失败，会不断重试
+     */
+    public synchronized void deleteShadow(PushShadowMode mode) {
+        libpushclient.native_pushDeleteShadow(mode.getIntValue());
     }
 
     /**
