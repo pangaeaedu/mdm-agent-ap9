@@ -39,6 +39,9 @@ public class libpushclient {
     // 标记消息已读
     public static native void native_pushAckMsg(long msgId);
 
+    // 发布主题消息
+    public static native int native_pushPublishMsgReq(String msgid, String topic, int qos, String content);
+
     // 订阅主题
     public static native void native_pushSubscribe(String[] topics, int[] qos, int arrayLen);
 

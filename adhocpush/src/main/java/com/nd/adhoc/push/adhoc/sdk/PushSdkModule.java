@@ -151,6 +151,20 @@ public class PushSdkModule {
     }
 
     /**
+     * 发送主题消息
+     *
+     * @param topic 主题 ，默认为空
+     * @param qos 见 PushQoS
+     * @param content 消息内容
+     * @return 0 成功
+     *         非0 失败
+     */
+    @SuppressLint("DefaultLocale")
+    public int publish(String topic, String msgid, PushQoS qos, String content) {
+        return libpushclient.native_pushPublishMsgReq(msgid, topic, qos.getIntValue(), content);
+    }
+
+    /**
      * 开始接收Push消息
      *
      * @param context      context
