@@ -126,6 +126,20 @@ public class PushSdkModule {
         mInited = true;
         restartPushSdk();
     }
+    /**
+     * 发送上行消息
+     *
+     * @param msgid 消息ID
+     * @param ttlSeconds 过期时间
+     * @param contentType 消息类型
+     * @param content 消息内容
+     * @return 0 成功
+     *         非0 失败
+     */
+    @SuppressLint("DefaultLocale")
+    public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+        return sendUpStreamMsg("", msgid, ttlSeconds, contentType, content);
+    }
 
     /**
      * 发送上行消息
