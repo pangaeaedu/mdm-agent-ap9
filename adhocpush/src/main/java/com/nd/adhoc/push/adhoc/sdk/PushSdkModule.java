@@ -27,9 +27,8 @@ public class PushSdkModule {
     private static PushSdkModule instance = new PushSdkModule();
 
     private static final String TAG = "PushSdkModule";
-    private String mIp;
 
-    private int mPort;
+    private String mLoadbalancer;
 
     // 从服务端获取
     private String mDevicetoken;
@@ -47,6 +46,8 @@ public class PushSdkModule {
     private String mAndroidId;
 
     private int mReconnectIntervalMs = 10000;
+
+    private int mOfflineTimeoutsec = 0, mRetryIntervalSec = 0, mRetryCount = 0, mDeadTimeouotSec = 0;
 
     private IPushSdkCallback mPushCallback;
 
@@ -79,13 +80,21 @@ public class PushSdkModule {
     /**
      * 开始接收Push消息
      *
-     * @param context      context
-     * @param appid        从Push后台申请的appId
-     * @param ip           push服务的IP
-     * @param port         push服务的端口
+     * @param context               context
+     * @param appid                 从Push后台申请的appId
+     * @param serverLbsUrl          服务器地址
+     *        开发: http://iot-api.dev.101.com:1770/v5/sdk/access
+     *        测试: http://172.24.132.143:8757/v5/sdk/access
+     *        预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
+     *        生产: http://iot-api.101.com:1770/v5/sdk/access
+     *        香港: http://iot-api.hk.101.com:1770/v5/sdk/access
+     *        CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
+     *        埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
+     *        埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
+     *                              
      * @param pushCallback 消息到来的回调
      */
-    private void doStartPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
+    private void doStartPushSdk(final Context context, String appid, String appKey, String serverLbsUrl, IPushSdkCallback pushCallback) {
         if (!mInited) {
 //            final String packageName = context.getPackageName();
 //            File sdCard = Environment.getExternalStorageDirectory();
@@ -107,16 +116,18 @@ public class PushSdkModule {
             mMac = DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
         }
-        Log.e(TAG,"start push sdk" +
-                " , ip = " + ip +
-                " , port = " + port +
+        mLoadbalancer = serverLbsUrl;
+        log.warn("start push sdk" +
+                " , loadbalancer = " + mLoadbalancer +
                 " , appid = " + appid +
                 " , manufactorer = " + mManufactor +
                 " , imei = " + mImei +
                 " , mac = " + mMac +
-                " , androidid = " + mAndroidId);
-        mIp = ip;
-        mPort = port;
+                " , androidid = " + mAndroidId +
+                " , mOfflineTimeoutsec = " + mOfflineTimeoutsec +
+                " , mRetryIntervalSec = " + mRetryIntervalSec +
+                " , mRetryCount = " + mRetryCount +
+                " , mDeadTimeouotSec = " + mDeadTimeouotSec );
         mAppid = appid;
         mAppKey = appKey;
         mPushCallback = pushCallback;
@@ -124,6 +135,8 @@ public class PushSdkModule {
             mAppKey = "";
         }
         mInited = true;
+        libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
         restartPushSdk();
     }
     /**
@@ -183,21 +196,28 @@ public class PushSdkModule {
      *
      * @param context      context
      * @param appid        从Push后台申请的appId
-     * @param ip           push服务的IP
-     * @param port         push服务的端口
+     * @param serverLbsUrl 服务器地址
+     *        开发: http://iot-api.dev.101.com:1770/v5/sdk/access
+     *        测试: http://172.24.132.143:8757/v5/sdk/access
+     *        预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
+     *        生产: http://iot-api.101.com:1770/v5/sdk/access
+     *        香港: http://iot-api.hk.101.com:1770/v5/sdk/access
+     *        CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
+     *        埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
+     *        埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
      * @param pushCallback 消息到来的回调
      */
     @SuppressLint("DefaultLocale")
-    public void startPushSdk(final Context context, final String appid, final String appKey, final String ip, final int port, final IPushSdkCallback pushCallback) {
+    public void startPushSdk(final Context context, final String appid, final String appKey, final String serverLbsUrl, final IPushSdkCallback pushCallback) {
         setupLogConfigurator(context);
 
-        Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
+        Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG,String.format("before run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
-                doStartPushSdk(context, appid, appKey, ip, port, pushCallback);
-                Log.e(TAG,String.format("after run startPushSdk(appid=%s, appKey=%s, ip=%s, port=%d)", appid, appKey != null ? appKey : "null", ip, port));
+                Log.e(TAG,String.format("before run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
+                doStartPushSdk(context, appid, appKey, serverLbsUrl, pushCallback);
+                Log.e(TAG,String.format("after run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
             }
         });
     }
@@ -262,13 +282,50 @@ public class PushSdkModule {
     }
 
     /**
+     * 可选设置，设置心跳时间
+     *
+     * 比如要求30秒内检测到掉线， 传入  20 3 3 60
+     * 注意：所有参数都不为0才有效， 只要其中一个为零即宣告无效（使用服务端默认配置）
+     */
+    @SuppressLint("DefaultLocale")
+    public void setServerOption(final int offlineTimeoutsec, final int retryIntervalSec, final int retryCount, final int deadTimeouotSec) {
+        log.info(String.format("setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
+                offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
+        mOfflineTimeoutsec = offlineTimeoutsec;
+        mRetryIntervalSec = retryIntervalSec;
+        mRetryCount = retryCount;
+        mDeadTimeouotSec = deadTimeouotSec;
+        executorService.submit(new Runnable() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void run() {
+                log.info(String.format("before setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
+                        offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
+                libpushclient.native_pushSetServerOptions(offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec);
+                log.info(String.format("after setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
+                        offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
+            }
+        });
+    }
+
+    /**
      * 设置负载均衡服务
+     *
+     * 开发: http://iot-api.dev.101.com:1770/v5/sdk/access
+     * 测试: http://172.24.132.143:8757/v5/sdk/access
+     * 预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
+     * 生产: http://iot-api.101.com:1770/v5/sdk/access
+     * 香港: http://iot-api.hk.101.com:1770/v5/sdk/access
+     * CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
+     * 埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
+     * 埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
      *
      * @param url 负载均衡服务地址
      */
     @SuppressLint("DefaultLocale")
     public void setLoadBalancer(final String url) {
         log.info(String.format("setLoadBalancer(url=%s)", url));
+        mLoadbalancer = url;
         executorService.submit(new Runnable() {
             @SuppressLint("DefaultLocale")
             @Override
@@ -416,8 +473,7 @@ public class PushSdkModule {
         mIsScheduleStarting = false;
         mLastRestartTimestampMs = SystemClock.elapsedRealtime();
         Log.e(TAG,"restart push sdk" +
-                " , ip = " + mIp +
-                " , port = " + mPort +
+                " , Loadbalancer = " + mLoadbalancer +
                 " , appid = " + mAppid +
                 " , manufactorer = " + mManufactor +
                 " , imei = " + mImei +
@@ -425,11 +481,10 @@ public class PushSdkModule {
                 " , androidid = " + mAndroidId);
         doNotifyClientConnectStatus(false);
         boolean needstart = false;
-        if (mIp == null || mIp.isEmpty()) {
-            Log.e(TAG,"Ip is null");
-        } else if (mPort <= 0) {
-            Log.e(TAG,"Port is wrong. Port = " + mPort);
-        } else if (mAppid == null || mAppid.isEmpty()) {
+        if (mLoadbalancer == null) {
+            Log.e(TAG,"Loadbalancer is null");
+        }
+        if (mAppid == null || mAppid.isEmpty()) {
             Log.e(TAG,"App id is null");
         } else {
             if (mManufactor == null || mManufactor.isEmpty()) {
@@ -460,10 +515,12 @@ public class PushSdkModule {
         }
         if (needstart) {
             if (mAutoStart) {
-                Log.d(TAG, "native_pushLogin start with IP:" + mIp + " port:" + mPort
+                Log.d(TAG, "native_pushLogin start " + " loadbalancer: " + mLoadbalancer
                         + " appID:" + mAppid + " appKey:" + mAppKey + " manufactor:" + mManufactor
                         + " imei:" + mImei + " mac:" + mMac);
-                libpushclient.native_pushLogin(mIp, mPort, mAppid, mAppKey, mManufactor, mImei,
+                libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+                libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
+                libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei,
                         mMac, "", mReconnectIntervalMs);
                 Log.e(TAG, "after run restartPushSdk");
             } else {

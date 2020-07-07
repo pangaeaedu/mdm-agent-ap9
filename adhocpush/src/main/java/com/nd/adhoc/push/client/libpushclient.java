@@ -27,8 +27,11 @@ public class libpushclient {
     // 设置负载均衡服务
     public static native void native_pushSetLoadBalancer(String host);
 
+    // 设置心跳时间
+    public static native void native_pushSetServerOptions(int offlineTimeoutsec, int retryIntervalSec, int retryCount, int deadTimeouotSec);
+
     // 开始接收Push消息
-    public static native void native_pushLogin(String ip, int port, String appId, String mAppKey, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
+    public static native void native_pushLogin(String appId, String mAppKey, String manuFactor, String imei, String mac, String androidId, int mReconnectInterval);
 
     // 停止接收Push消息
     public static native void native_pushDisconnect();
