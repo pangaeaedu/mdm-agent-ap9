@@ -82,8 +82,8 @@ public class libpushclient {
         PushSdkModule.getInstance().notifyDeviceToken(deviceToken);
     }
 
-    public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, byte[] data, String []extraKeys, String []extarValues) {
-        PushSdkModule.getInstance().notifyPushMessage(appId, msgtype, contenttype, msgid, msgTime, data, extraKeys, extarValues);
+    public static void onPushMessage(String appId, int msgtype, byte[] contenttype, long msgid, long msgTime, String topic, byte[] data, String []extraKeys, String []extarValues) {
+        PushSdkModule.getInstance().notifyPushMessage(appId, msgtype, contenttype, msgid, msgTime, topic, data, extraKeys, extarValues);
     }
 
     public static void onPushUpstreamSent(String msgid, int errCode) {

@@ -190,7 +190,7 @@ public class AdhocPushChannel extends BasePushChannel {
 
         @Override
         public byte[] onPushMessage(String appId, int msgtype, byte[] contenttype,
-                                    long msgid, long msgTime, byte[] content,
+                                    long msgid, long msgTime, String topic, byte[] content,
                                     String[] extraKeys, String[] extraValues) {
             try {
                 for (IPushChannelDataListener listener : mDataListeners) {
