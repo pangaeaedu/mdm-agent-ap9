@@ -625,7 +625,7 @@ public class PushSdkModule {
     }
 
     @SuppressLint("DefaultLocale")
-    public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final byte[] data, final String[] extraKeys, final String[] extraValues) {
+    public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final String topic, final byte[] data, final String[] extraKeys, final String[] extraValues) {
         Log.e(TAG,String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
         executorService.submit(new Runnable() {
             @Override
