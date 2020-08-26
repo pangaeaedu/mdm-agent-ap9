@@ -72,6 +72,7 @@ public class PushSdkModule {
     private static long RESTART_INTERVAL_MS = 5000;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private String mAlias;
 
     public static PushSdkModule getInstance() {
         return instance;
@@ -406,7 +407,23 @@ public class PushSdkModule {
      *          非零值           错误码, 即使返回错误码， 也有可能成功， 因为等待服务端回应只等待1秒， 服务端仍然有可能成功
      */
     public int setAlias(String alias) {
-        return libpushclient.native_pushSetAlias(alias);
+        String token = mDevicetoken;
+        if (token == null) {
+            log.info("setAlias error:token not set");
+            return -1;
+        }
+        if (alias != null && alias.equals(mAlias)) {
+            //同样的token已经绑定过这个别名
+            log.info("setAlias : alias already set :" + alias);
+            return 0;
+        }
+        int result = libpushclient.native_pushSetAlias(alias);
+        log.info("setAlias result:" + result);
+        if (result == 0) {
+            //绑定成功了，保存别名
+            mAlias = alias;
+        }
+        return result;
     }
 
     /**
@@ -611,6 +628,10 @@ public class PushSdkModule {
             @Override
             public void run() {
                 Log.e(TAG,"before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                if (deviceToken != null && !deviceToken.equals(mDevicetoken)) {
+                    //传进来新的token,把缓存的别名清掉
+                    mAlias = null;
+                }
                 mDevicetoken = deviceToken;
                 if (mPushCallback != null) {
                     try {
