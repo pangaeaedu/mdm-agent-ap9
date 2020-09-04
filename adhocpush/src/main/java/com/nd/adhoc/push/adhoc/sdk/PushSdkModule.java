@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.adhoc.push.client.libpushclient;
-import com.nd.android.adhoc.basic.util.storage.AdhocStorageUtil;
+import com.nd.android.adhoc.basic.util.storage.AdhocStorageAdapter;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
@@ -74,6 +74,8 @@ public class PushSdkModule {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private String mAlias;
 
+    private static boolean mIsInited = false;
+
     public static PushSdkModule getInstance() {
         return instance;
     }
@@ -103,9 +105,9 @@ public class PushSdkModule {
 //                sdCard = Environment.getDownloadCacheDirectory();
 //            }
 
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(context);
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
             if (null != sdCard) {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
@@ -226,7 +228,7 @@ public class PushSdkModule {
     private void setupLogConfigurator(Context pContext){
         try {
 
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(pContext);
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
 
             if (TextUtils.isEmpty(sdCard)) {
                 LogConfigurator logConfigurator = new LogConfigurator();
@@ -240,7 +242,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("no sdcard for log");
             } else {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "adhoclog/";
                 String log4jLogPath = logPath + "push.log";
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setFileName(log4jLogPath);
@@ -254,6 +256,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("logpath " + log4jLogPath);
             }
+            mIsInited = true;
         }catch (Exception e){
             e.printStackTrace();
         }
