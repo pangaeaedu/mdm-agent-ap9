@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.adhoc.push.client.libpushclient;
-import com.nd.android.adhoc.basic.util.storage.AdhocStorageUtil;
+import com.nd.android.adhoc.basic.util.storage.AdhocStorageAdapter;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
@@ -65,12 +65,15 @@ public class PushSdkModule {
     private String manufactorName = "";
 
     private String manufactorToken = "";
-	
+
     private boolean mAutoStart = true;
 
     private static long RESTART_INTERVAL_MS = 5000;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private String mAlias;
+
+    private static boolean mIsInited = false;
 
     public static PushSdkModule getInstance() {
         return instance;
@@ -93,9 +96,9 @@ public class PushSdkModule {
 //                sdCard = Environment.getDownloadCacheDirectory();
 //            }
 
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(context);
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
             if (null != sdCard) {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
@@ -205,7 +208,7 @@ public class PushSdkModule {
     private void setupLogConfigurator(Context pContext){
         try {
 
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(pContext);
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
 
             if (TextUtils.isEmpty(sdCard)) {
                 LogConfigurator logConfigurator = new LogConfigurator();
@@ -219,7 +222,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("no sdcard for log");
             } else {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "adhoclog/";
                 String log4jLogPath = logPath + "push.log";
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setFileName(log4jLogPath);
@@ -233,6 +236,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("logpath " + log4jLogPath);
             }
+            mIsInited = true;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -349,7 +353,23 @@ public class PushSdkModule {
      *          非零值           错误码, 即使返回错误码， 也有可能成功， 因为等待服务端回应只等待1秒， 服务端仍然有可能成功
      */
     public int setAlias(String alias) {
-        return libpushclient.native_pushSetAlias(alias);
+        String token = mDevicetoken;
+        if (token == null) {
+            log.info("setAlias error:token not set");
+            return -1;
+        }
+        if (alias != null && alias.equals(mAlias)) {
+            //同样的token已经绑定过这个别名
+            log.info("setAlias : alias already set :" + alias);
+            return 0;
+        }
+        int result = libpushclient.native_pushSetAlias(alias);
+        log.info("setAlias result:" + result);
+        if (result == 0) {
+            //绑定成功了，保存别名
+            mAlias = alias;
+        }
+        return result;
     }
 
     /**
@@ -554,6 +574,10 @@ public class PushSdkModule {
             @Override
             public void run() {
                 Log.e(TAG,"before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                if (deviceToken != null && !deviceToken.equals(mDevicetoken)) {
+                    //传进来新的token,把缓存的别名清掉
+                    mAlias = null;
+                }
                 mDevicetoken = deviceToken;
                 if (mPushCallback != null) {
                     try {

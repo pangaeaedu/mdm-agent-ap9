@@ -21,7 +21,7 @@ buildscript {
 
 ext {
     //框架，基础库
-    adhoc_basic_version = '1.8.444.a7a2727'
+    adhoc_basic_version = '1.9.516.15194e9-hykencrypstorage-SNAPSHOT'
 
     mdm_biz_version = '1.9.567.1b22f65-features-yhq0760preproduction-SNAPSHOT'
     device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
@@ -35,7 +35,7 @@ ext {
     adhoc_push_util_version = '0.3.25.103.1dd4e37'
 
     androidBuildToolsVersion = '28.0.3'
-    androidMinSdkVersion = 17
+    androidMinSdkVersion = 18
     androidTargetSdkVersion = 28
     androidCompileSdkVersion = 28
     androidSupportSdkVersion = '28.0.0'
