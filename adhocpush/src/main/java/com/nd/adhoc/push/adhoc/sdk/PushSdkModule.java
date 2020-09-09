@@ -73,8 +73,6 @@ public class PushSdkModule {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private String mAlias;
 
-    private static boolean mIsInited = false;
-
     public static PushSdkModule getInstance() {
         return instance;
     }
@@ -90,25 +88,26 @@ public class PushSdkModule {
      */
     private void doStartPushSdk(final Context context, String appid, String appKey, String ip, int port, IPushSdkCallback pushCallback) {
         if (!mInited) {
-//            final String packageName = context.getPackageName();
-//            File sdCard = Environment.getExternalStorageDirectory();
-//            if (null == sdCard) {
-//                sdCard = Environment.getDownloadCacheDirectory();
-//            }
-
+            Log.i(TAG, "doStartPushSdk: init data");
             String sdCard = AdhocStorageAdapter.getFilesDir("log");
             if (null != sdCard) {
-                String logPath = sdCard + "/adhoclog/";
+                String logPath = sdCard + "adhoclog/";
                 libpushclient.native_pushInit(logPath);
+                Log.i(TAG, "doStartPushSdk: init log path:" + logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
+            Log.i(TAG, "doStartPushSdk: init pseudoId:" + pseudoId);
             mManufactor = DeviceUtil.getManufactorer();
+            Log.i(TAG, "doStartPushSdk: init Manufactorer:" + mManufactor);
             mImei = DeviceUtil.getImei(context);
             if (null == mImei) {
                 mImei = pseudoId;
             }
+            Log.i(TAG, "doStartPushSdk: init imei:" + mImei);
             mMac = DeviceUtil.getMac(context);
+            Log.i(TAG, "doStartPushSdk: init mac:" + mMac);
             mAndroidId = DeviceUtil.getAndroidId(context);
+            Log.i(TAG, "doStartPushSdk: init android id:" + mAndroidId);
         }
         Log.e(TAG,"start push sdk" +
                 " , ip = " + ip +
@@ -236,7 +235,6 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("logpath " + log4jLogPath);
             }
-            mIsInited = true;
         }catch (Exception e){
             e.printStackTrace();
         }
