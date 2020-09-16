@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.adhoc.push.client.libpushclient;
-import com.nd.android.adhoc.basic.util.storage.AdhocStorageAdapter;
+import com.nd.android.adhoc.basic.util.storage.AdhocStorageUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
@@ -29,6 +29,10 @@ public class PushSdkModule {
     private static final String TAG = "PushSdkModule";
 
     private String mLoadbalancer;
+
+    private String mDefaultIp = "";
+
+    private int mDefaultPort = 0;
 
     // 从服务端获取
     private String mDevicetoken;
@@ -74,8 +78,6 @@ public class PushSdkModule {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private String mAlias;
 
-    private static boolean mIsInited = false;
-
     public static PushSdkModule getInstance() {
         return instance;
     }
@@ -105,9 +107,9 @@ public class PushSdkModule {
 //                sdCard = Environment.getDownloadCacheDirectory();
 //            }
 
-            String sdCard = AdhocStorageAdapter.getFilesDir("log");
+            String sdCard = AdhocStorageUtil.getSDCardFilesDir(context);
             if (null != sdCard) {
-                String logPath = sdCard + "/adhoclog/";
+                String logPath = sdCard + "/log/adhoclog/";
                 libpushclient.native_pushInit(logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
@@ -122,6 +124,8 @@ public class PushSdkModule {
         mLoadbalancer = serverLbsUrl;
         log.warn("start push sdk" +
                 " , loadbalancer = " + mLoadbalancer +
+                " , defaultIp = " + mDefaultIp +
+                " , defaultPort = " + mDefaultPort +
                 " , appid = " + appid +
                 " , manufactorer = " + mManufactor +
                 " , imei = " + mImei +
@@ -138,6 +142,7 @@ public class PushSdkModule {
             mAppKey = "";
         }
         mInited = true;
+        libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
         libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
         libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
         restartPushSdk();
@@ -228,7 +233,7 @@ public class PushSdkModule {
     private void setupLogConfigurator(Context pContext){
         try {
 
-            String sdCard = AdhocStorageAdapter.getFilesDir("log");
+            String sdCard = AdhocStorageUtil.getSDCardFilesDir(pContext);
 
             if (TextUtils.isEmpty(sdCard)) {
                 LogConfigurator logConfigurator = new LogConfigurator();
@@ -242,7 +247,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("no sdcard for log");
             } else {
-                String logPath = sdCard + "adhoclog/";
+                String logPath = sdCard + "/log/adhoclog/";
                 String log4jLogPath = logPath + "push.log";
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setFileName(log4jLogPath);
@@ -256,7 +261,6 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("logpath " + log4jLogPath);
             }
-            mIsInited = true;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -337,6 +341,25 @@ public class PushSdkModule {
                 log.info(String.format("before run setLoadBalancer(url=%s)", url));
                 libpushclient.native_pushSetLoadBalancer(url);
                 log.info(String.format("after run setLoadBalancer(url=%s)", url));
+            }
+        });
+    }
+
+    /**
+     * 设置默认服务地址
+     */
+    @SuppressLint("DefaultLocale")
+    public void setDefaultServerAddr(final String ip, final int port) {
+        log.info(String.format("setDefaultServerAddr(ip=%s,port=%d)", ip, port));
+        mDefaultIp = ip;
+        mDefaultPort = port;
+        executorService.submit(new Runnable() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void run() {
+                log.info(String.format("before run setDefaultServerAddr(ip=%s,port=%d)", ip, port));
+                libpushclient.native_pushSetDefaultServerAddr(ip, port);
+                log.info(String.format("after run setDefaultServerAddr(ip=%s,port=%d)", ip, port));
             }
         });
     }
@@ -535,9 +558,15 @@ public class PushSdkModule {
         }
         if (needstart) {
             if (mAutoStart) {
-                Log.d(TAG, "native_pushLogin start " + " loadbalancer: " + mLoadbalancer
-                        + " appID:" + mAppid + " appKey:" + mAppKey + " manufactor:" + mManufactor
+                Log.d(TAG, "native_pushLogin start "
+                        + " loadbalancer: " + mLoadbalancer
+                        + " defaultIp: " + mDefaultIp
+                        + " defaultPort: " + mDefaultPort
+                        + " appID:" + mAppid
+                        + " appKey:" + mAppKey
+                        + " manufactor:" + mManufactor
                         + " imei:" + mImei + " mac:" + mMac);
+                libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
                 libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
                 libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
                 libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei,

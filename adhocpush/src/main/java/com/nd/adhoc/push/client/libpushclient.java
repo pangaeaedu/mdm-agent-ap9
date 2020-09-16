@@ -27,6 +27,9 @@ public class libpushclient {
     // 设置负载均衡服务
     public static native void native_pushSetLoadBalancer(String host);
 
+    // 设置默认服务地址
+    public static native void native_pushSetDefaultServerAddr(String ip, int port);
+
     // 设置心跳时间
     public static native void native_pushSetServerOptions(int offlineTimeoutsec, int retryIntervalSec, int retryCount, int deadTimeouotSec);
 
