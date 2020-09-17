@@ -3,6 +3,8 @@ package com.nd.adhoc.push.adhoc.utils;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
+
 /**
  * Created by Administrator on 2019/9/3 0003.
  */
@@ -23,7 +25,7 @@ public class PushSpConfigFactory {
         if(mSpConfig == null){
             synchronized (this){
                 if(mSpConfig == null){
-                    mSpConfig = new PushSpConfig(pContext);
+                    mSpConfig = new PushSpConfig(AdhocBasicConfig.getInstance().getStorageContext());
                 }
             }
         }

@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.adhoc.push.client.libpushclient;
-import com.nd.android.adhoc.basic.util.storage.AdhocStorageUtil;
+import com.nd.android.adhoc.basic.util.storage.AdhocStorageAdapter;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
@@ -70,7 +70,7 @@ public class PushSdkModule {
     private String manufactorName = "";
 
     private String manufactorToken = "";
-	
+
     private boolean mAutoStart = true;
 
     private static long RESTART_INTERVAL_MS = 5000;
@@ -101,25 +101,26 @@ public class PushSdkModule {
      */
     private void doStartPushSdk(final Context context, String appid, String appKey, String serverLbsUrl, IPushSdkCallback pushCallback) {
         if (!mInited) {
-//            final String packageName = context.getPackageName();
-//            File sdCard = Environment.getExternalStorageDirectory();
-//            if (null == sdCard) {
-//                sdCard = Environment.getDownloadCacheDirectory();
-//            }
-
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(context);
+            Log.i(TAG, "doStartPushSdk: init data");
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
             if (null != sdCard) {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "adhoclog/";
                 libpushclient.native_pushInit(logPath);
+                Log.i(TAG, "doStartPushSdk: init log path:" + logPath);
             }
             String pseudoId = DeviceUtil.getPseudoId();
+            Log.i(TAG, "doStartPushSdk: init pseudoId:" + pseudoId);
             mManufactor = DeviceUtil.getManufactorer();
+            Log.i(TAG, "doStartPushSdk: init Manufactorer:" + mManufactor);
             mImei = DeviceUtil.getImei(context);
             if (null == mImei) {
                 mImei = pseudoId;
             }
+            Log.i(TAG, "doStartPushSdk: init imei:" + mImei);
             mMac = DeviceUtil.getMac(context);
+            Log.i(TAG, "doStartPushSdk: init mac:" + mMac);
             mAndroidId = DeviceUtil.getAndroidId(context);
+            Log.i(TAG, "doStartPushSdk: init android id:" + mAndroidId);
         }
         mLoadbalancer = serverLbsUrl;
         log.warn("start push sdk" +
@@ -233,7 +234,7 @@ public class PushSdkModule {
     private void setupLogConfigurator(Context pContext){
         try {
 
-            String sdCard = AdhocStorageUtil.getSDCardFilesDir(pContext);
+            String sdCard = AdhocStorageAdapter.getFilesDir("log");
 
             if (TextUtils.isEmpty(sdCard)) {
                 LogConfigurator logConfigurator = new LogConfigurator();
@@ -247,7 +248,7 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("no sdcard for log");
             } else {
-                String logPath = sdCard + "/log/adhoclog/";
+                String logPath = sdCard + "adhoclog/";
                 String log4jLogPath = logPath + "push.log";
                 LogConfigurator logConfigurator = new LogConfigurator();
                 logConfigurator.setFileName(log4jLogPath);
