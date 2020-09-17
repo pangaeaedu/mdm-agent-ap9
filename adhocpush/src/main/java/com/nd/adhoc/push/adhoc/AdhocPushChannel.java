@@ -116,9 +116,9 @@ public class AdhocPushChannel extends BasePushChannel {
 
     private void startAdhocPush(final Context pContext, IPushSdkCallback pushCallback) {
 
-        String pushLbsUrl = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
-        //int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
-
+        String pushIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
+        int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
+        String pushLbsUrl = MdmEvnFactory.getInstance().getCurEnvironment().getPushLbs();
         String pushAppID = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppId();
         String pushAppKey = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppKey();
         try {
@@ -130,7 +130,7 @@ public class AdhocPushChannel extends BasePushChannel {
         } catch (Exception e) {
             CrashAnalytics.INSTANCE.reportException(e);
         }
-
+        PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
         Log.e(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
         PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);
 
