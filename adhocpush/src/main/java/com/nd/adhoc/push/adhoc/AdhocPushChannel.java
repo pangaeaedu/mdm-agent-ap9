@@ -1,16 +1,13 @@
 package com.nd.adhoc.push.adhoc;
 
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
@@ -24,7 +21,6 @@ import com.nd.adhoc.push.core.PushRecvDataImpl;
 import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.android.adhoc.basic.log.CrashAnalytics;
-import com.nd.android.adhoc.basic.util.permission.AdhocRxPermissions;
 import com.nd.android.mdm.biz.env.MdmEvnFactory;
 import com.nd.android.mdm.util.cmd.CmdUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
@@ -86,30 +82,30 @@ public class AdhocPushChannel extends BasePushChannel {
         Log.e(TAG, "AdhocPushChannel start");
         final Context context = AdhocBasicConfig.getInstance().getAppContext();
 
-        if (ActivityCompat.checkSelfPermission(AdhocBasicConfig.getInstance().getAppContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+//        if (ActivityCompat.checkSelfPermission(AdhocBasicConfig.getInstance().getAppContext(),
+//                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             startAdhocPush(context, mPushSdkCallback);
             return Observable.just(true);
-        } else {
-            return AdhocRxPermissions.getInstance(context)
-                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    .map(new Func1<Boolean, Boolean>() {
-                        @Override
-                        public Boolean call(Boolean pBoolean) {
-                            if (pBoolean) {
-
-                                startAdhocPush(context, mPushSdkCallback);
-                                return true;
-                            }
-
-//                        CrashAnalytics.INSTANCE
-//                                .reportException(new Exception("start adhoc push failed, do not have write external " +
-//                                "storage permission"));
-                            Log.e(TAG, "start adhoc push failed, do not have write external storage permission");
-                            return false;
-                        }
-                    });
-        }
+//        } else {
+//            return AdhocRxPermissions.getInstance(context)
+//                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                    .map(new Func1<Boolean, Boolean>() {
+//                        @Override
+//                        public Boolean call(Boolean pBoolean) {
+//                            if (pBoolean) {
+//
+//                                startAdhocPush(context, mPushSdkCallback);
+//                                return true;
+//                            }
+//
+////                        CrashAnalytics.INSTANCE
+////                                .reportException(new Exception("start adhoc push failed, do not have write external " +
+////                                "storage permission"));
+//                            Log.e(TAG, "start adhoc push failed, do not have write external storage permission");
+//                            return false;
+//                        }
+//                    });
+//        }
 
     }
 
