@@ -40,7 +40,7 @@ public class AdhocPushChannel extends BasePushChannel {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            PushSdkModule.getInstance().restartPushSdk();
+            PushSdkModule.getInstance().triggetReconnect();
         }
     };
 
@@ -213,15 +213,20 @@ public class AdhocPushChannel extends BasePushChannel {
         }
 
         @Override
-        public void notifyMessageSentResult(String pMsgID, int pErrorCode) throws RemoteException {
+        public void onPushUpstreamSent(String msgId, int errCode) throws RemoteException {
             try {
                 for (IPushChannelDataListener listener : mDataListeners) {
-                    listener.onMessageSendResult(pMsgID, pErrorCode);
+                    listener.onMessageSendResult(msgId, errCode);
                 }
             } catch (Exception e) {
                 CrashAnalytics.INSTANCE.reportException(e);
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        public void onPushShadowUpdated(int mode, String document) throws RemoteException {
+
         }
     };
 
