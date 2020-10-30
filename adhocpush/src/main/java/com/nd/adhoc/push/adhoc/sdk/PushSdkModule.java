@@ -2,22 +2,31 @@ package com.nd.adhoc.push.adhoc.sdk;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
-import com.nd.adhoc.push.client.libpushclient;
 import com.nd.android.adhoc.basic.util.storage.AdhocStorageAdapter;
+
+import com.nd.adhoc.push.client.libpushclient;
+import com.nd.adhoc.push.adhoc.utils.DeviceUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import de.mindpipe.android.logging.log4j.LogConfigurator;
 
@@ -49,6 +58,8 @@ public class PushSdkModule {
 
     private String mAndroidId;
 
+    private String mCacheDir = "";
+
     private int mReconnectIntervalMs = 10000;
 
     private int mOfflineTimeoutsec = 0, mRetryIntervalSec = 0, mRetryCount = 0, mDeadTimeouotSec = 0;
@@ -78,6 +89,8 @@ public class PushSdkModule {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private String mAlias;
 
+    private Context mContext = null;
+
     public static PushSdkModule getInstance() {
         return instance;
     }
@@ -85,42 +98,50 @@ public class PushSdkModule {
     /**
      * 开始接收Push消息
      *
-     * @param context               context
-     * @param appid                 从Push后台申请的appId
-     * @param serverLbsUrl          服务器地址
-     *        开发: http://iot-api.dev.101.com:1770/v5/sdk/access
-     *        测试: http://172.24.132.143:8757/v5/sdk/access
-     *        预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
-     *        生产: http://iot-api.101.com:1770/v5/sdk/access
-     *        香港: http://iot-api.hk.101.com:1770/v5/sdk/access
-     *        CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
-     *        埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
-     *        埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
-     *                              
+     * @param context      context
+     * @param appid        从Push后台申请的appId
+     * @param serverLbsUrl 服务器地址
+     *                     开发: http://iot-api.dev.101.com:1770/v5/sdk/access
+     *                     测试: http://172.24.132.143:8757/v5/sdk/access
+     *                     预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
+     *                     生产: http://iot-api.101.com:1770/v5/sdk/access
+     *                     香港: http://iot-api.hk.101.com:1770/v5/sdk/access
+     *                     CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
+     *                     埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
+     *                     埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
      * @param pushCallback 消息到来的回调
      */
     private void doStartPushSdk(final Context context, String appid, String appKey, String serverLbsUrl, IPushSdkCallback pushCallback) {
+        final String packageName = context.getPackageName();
         if (!mInited) {
             Log.i(TAG, "doStartPushSdk: init data");
-            String sdCard = AdhocStorageAdapter.getFilesDir("log");
-            if (null != sdCard) {
-                String logPath = sdCard + "adhoclog/";
-                libpushclient.native_pushInit(logPath);
-                Log.i(TAG, "doStartPushSdk: init log path:" + logPath);
+            if (mCacheDir.length() == 0) {
+            	String sdCard = AdhocStorageAdapter.getFilesDir("log");
+	            if (null != sdCard) {
+	                String logPath = sdCard + "adhoclog/";
+                    mCacheDir = logPath;
+                }
             }
-            String pseudoId = DeviceUtil.getPseudoId();
-            Log.i(TAG, "doStartPushSdk: init pseudoId:" + pseudoId);
+
+            libpushclient.native_pushInit(mCacheDir);
+
+
+//            String pseudoId = DeviceUtil.getPseudoId();
+            String deviceUUID = DeviceUtil.getDeviceUUID(context, false);
+            ;
             mManufactor = DeviceUtil.getManufactorer();
-            Log.i(TAG, "doStartPushSdk: init Manufactorer:" + mManufactor);
-            mImei = DeviceUtil.getImei(context);
-            if (null == mImei) {
-                mImei = pseudoId;
-            }
-            Log.i(TAG, "doStartPushSdk: init imei:" + mImei);
-            mMac = DeviceUtil.getMac(context);
-            Log.i(TAG, "doStartPushSdk: init mac:" + mMac);
+            mImei = deviceUUID;//DeviceUtil.getImei(context);
+//            if (null == mImei || mImei.isEmpty()) {
+//                mImei = deviceUUID;
+//            }
+            mMac = getCachedUUID();//DeviceUtil.getMac(context);
             mAndroidId = DeviceUtil.getAndroidId(context);
-            Log.i(TAG, "doStartPushSdk: init android id:" + mAndroidId);
+
+            if (mMac.length() > 0) {
+                mImei = "";
+                mAndroidId = "";
+                log.warn("android use mac only");
+            }
         }
         mLoadbalancer = serverLbsUrl;
         log.warn("start push sdk" +
@@ -135,7 +156,7 @@ public class PushSdkModule {
                 " , mOfflineTimeoutsec = " + mOfflineTimeoutsec +
                 " , mRetryIntervalSec = " + mRetryIntervalSec +
                 " , mRetryCount = " + mRetryCount +
-                " , mDeadTimeouotSec = " + mDeadTimeouotSec );
+                " , mDeadTimeouotSec = " + mDeadTimeouotSec);
         mAppid = appid;
         mAppKey = appKey;
         mPushCallback = pushCallback;
@@ -146,8 +167,99 @@ public class PushSdkModule {
         libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
         libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
         libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
-        restartPushSdk();
+        doConnectPush();
     }
+
+    private String getCachedUUIDPath() {
+        if (mCacheDir.length() > 0 && mCacheDir.charAt(mCacheDir.length() - 1) == '/') {
+            return mCacheDir + "uuid.uuid";
+        }
+        return mCacheDir + "/uuid.uuid";
+    }
+
+    private String getCachedUUID() {
+        String uuidPath = getCachedUUIDPath();
+        try {
+            FileInputStream fis = new FileInputStream(uuidPath);
+            byte[] lsy = new byte[fis.available()];
+            int read = fis.read(lsy);
+            fis.close();
+            String jsonStr = new String(lsy, 0, read);
+            JSONObject obj = new JSONObject(jsonStr);
+            String uuid = obj.getString("uuid");
+            if (uuid.length() != 0) {
+                log.warn("get sd cached uuid success , uuidPath = " + uuidPath + ", uuid = " + uuid);
+
+                // write to shared reference
+                writeUUIDToSP(uuid);
+
+                return uuid;
+            }
+        } catch (Exception e) {
+            log.warn("get sd cached uuid failed , uuidPath = " + uuidPath + ", e = " + e.toString());
+        }
+        return getSPCachedUUID();
+    }
+
+    private String getSPCachedUUID() {
+        try {
+            SharedPreferences sp = mContext.getSharedPreferences("XPUSHSP", Context.MODE_PRIVATE);
+            String uuid = sp.getString("uuid", "");
+            if (uuid.length() > 0) {
+                log.warn("get sp cached uuid success , uuid = " + uuid);
+                return uuid;
+            } else {
+                log.warn("get sp cached uuid empty ");
+                return createCachedUUID();
+            }
+        } catch (Exception e) {
+            log.warn("get sp cached uuid failed , " + "e = " + e.toString());
+        }
+        return createCachedUUID();
+    }
+
+    private void writeUUIDToSP(String uuid) {
+        try {
+            SharedPreferences sp = mContext.getSharedPreferences("XPUSHSP", Context.MODE_PRIVATE);
+            sp.edit().putString("uuid",uuid).apply();
+            log.warn("set sp cached uuid success , uuid = " + uuid);
+        } catch (Exception e) {
+            log.warn("set sp cached uuid failed , uuid = " + uuid + ", e = " + e.toString());
+        }
+
+    }
+
+    private String createCachedUUID() {
+        String uuid = UUID.randomUUID().toString();
+        writeUUIDToSD(uuid);
+        writeUUIDToSP(uuid);
+        return uuid;
+    }
+
+    private void writeUUIDToSD(String uuid) {
+        String uuidPath = getCachedUUIDPath();
+        File myFilePath = new File(uuidPath);
+        try {
+            if (!myFilePath.exists()) {
+                myFilePath.createNewFile();
+            } else {
+                myFilePath.delete();
+                myFilePath.createNewFile();
+            }
+            FileWriter resultFile = new FileWriter(myFilePath);
+            PrintWriter myFile = new PrintWriter(resultFile);
+            JSONObject obj = new JSONObject();
+            obj.put("uuid", uuid);
+            myFile.println(obj.toString());
+            resultFile.close();
+            log.warn("set sd cached uuid success , uuidPath = " + uuidPath + ", content = " + obj.toString());
+        } catch (IOException | JSONException e) {
+            log.warn("set sd cached uuid failed , uuidPath = " + uuidPath + ",e = " + e.toString());
+        }
+    }
+
+
+	
     /**
      * 发送上行消息
      *
@@ -206,18 +318,19 @@ public class PushSdkModule {
      * @param context      context
      * @param appid        从Push后台申请的appId
      * @param serverLbsUrl 服务器地址
-     *        开发: http://iot-api.dev.101.com:1770/v5/sdk/access
-     *        测试: http://172.24.132.143:8757/v5/sdk/access
-     *        预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
-     *        生产: http://iot-api.101.com:1770/v5/sdk/access
-     *        香港: http://iot-api.hk.101.com:1770/v5/sdk/access
-     *        CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
-     *        埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
-     *        埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
+     *                     开发: http://iot-api.dev.101.com:1770/v5/sdk/access
+     *                     测试: http://172.24.132.143:8757/v5/sdk/access
+     *                     预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
+     *                     生产: http://iot-api.101.com:1770/v5/sdk/access
+     *                     香港: http://iot-api.hk.101.com:1770/v5/sdk/access
+     *                     CA: http://iot-api.awsca.101.com:1770/v5/sdk/access
+     *                     埃及自用演练：http://172.24.132.63:8757/v5/sdk/access
+     *                     埃及OMO演练：https://omo-mdm-pushlbs.moe.101.com/v5/sdk/access
      * @param pushCallback 消息到来的回调
      */
     @SuppressLint("DefaultLocale")
     public void startPushSdk(final Context context, final String appid, final String appKey, final String serverLbsUrl, final IPushSdkCallback pushCallback) {
+        mContext = context;
         setupLogConfigurator(context);
 
         Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
@@ -231,7 +344,8 @@ public class PushSdkModule {
         });
     }
 
-    private void setupLogConfigurator(Context pContext){
+    private void setupLogConfigurator(Context context){
+        final String packageName = context.getPackageName();
         try {
 
             String sdCard = AdhocStorageAdapter.getFilesDir("log");
@@ -262,16 +376,29 @@ public class PushSdkModule {
                 logConfigurator.configure();
                 log.warn("logpath " + log4jLogPath);
             }
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            configureLogcat();
+        }
+    }
+
+    private void configureLogcat() {
+        try {
+            LogConfigurator logConfigurator = new LogConfigurator();
+            logConfigurator.setRootLevel(Level.ALL);
+            logConfigurator.setUseFileAppender(false);
+            logConfigurator.setUseLogCatAppender(true);
+            logConfigurator.configure();
+            log.warn("no permission for log , use logcat");
+        } catch (Exception e) {
+
         }
     }
 
     /**
      * 设置厂商推送通道（在PushLogin之前调用）
      *
-     * @param packageName 在这个厂商的包名
-     * @param manufactorName 厂商名
+     * @param packageName     在这个厂商的包名
+     * @param manufactorName  厂商名
      * @param manufactorToken 厂商分配的设备Token
      */
     public synchronized void setMFChannel(final String packageName, final String manufactorName, final String manufactorToken) {
@@ -292,7 +419,7 @@ public class PushSdkModule {
 
     /**
      * 可选设置，设置心跳时间
-     *
+     * <p>
      * 比如要求30秒内检测到掉线， 传入  20 3 3 60
      * 注意：所有参数都不为0才有效， 只要其中一个为零即宣告无效（使用服务端默认配置）
      */
@@ -319,7 +446,7 @@ public class PushSdkModule {
 
     /**
      * 设置负载均衡服务
-     *
+     * <p>
      * 开发: http://iot-api.dev.101.com:1770/v5/sdk/access
      * 测试: http://172.24.132.143:8757/v5/sdk/access
      * 预生产: http://iot-api.beta.101.com:1770/v5/sdk/access
@@ -372,7 +499,7 @@ public class PushSdkModule {
         String[] topicsArray = new String[topics.size()];
         int[] qosArray = new int[topics.size()];
         int index = 0;
-        for (Map.Entry<String,PushQoS> topic : topics.entrySet()) {
+        for (Map.Entry<String, PushQoS> topic : topics.entrySet()) {
             topicsArray[index] = topic.getKey();
             qosArray[index] = topic.getValue().getIntValue();
             index++;
@@ -399,11 +526,11 @@ public class PushSdkModule {
      *
      * @param tags Map<String,String>  ，比如 <省份,福建>
      */
-    public void addTags(Map<String,String> tags) {
+    public void addTags(Map<String, String> tags) {
         String[] keys = new String[tags.size()];
         String[] values = new String[tags.size()];
         int index = 0;
-        for (Map.Entry<String,String> tag : tags.entrySet()) {
+        for (Map.Entry<String, String> tag : tags.entrySet()) {
             keys[index] = tag.getKey();
             values[index] = tag.getValue();
             index++;
@@ -416,7 +543,7 @@ public class PushSdkModule {
      *
      * @param keys 需要删除的标签 Key
      */
-    public void removeTags(String []keys) {
+    public void removeTags(String[] keys) {
         libpushclient.native_pushRemoveTags(keys, keys.length);
     }
 
@@ -430,8 +557,8 @@ public class PushSdkModule {
     /**
      * 设置别名，最多可能会阻塞1秒，注意该请求如果失败，会在下次登陆成功后重试，但程序重启后不会
      *
-     * @return  0               表示成功
-     *          非零值           错误码, 即使返回错误码， 也有可能成功， 因为等待服务端回应只等待1秒， 服务端仍然有可能成功
+     * @return 0               表示成功
+     * 非零值           错误码, 即使返回错误码， 也有可能成功， 因为等待服务端回应只等待1秒， 服务端仍然有可能成功
      */
     public int setAlias(String alias) {
         String token = mDevicetoken;
@@ -479,40 +606,24 @@ public class PushSdkModule {
     /**
      * 断开并重新连接push服务
      */
-    public void restartPushSdk() {
-        log.info("restartPushSdk , version = 0.3.23");
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                long lastRestartInterval = SystemClock.elapsedRealtime()-mLastRestartTimestampMs;
-                long scheduleInterval = RESTART_INTERVAL_MS-lastRestartInterval;
-                log.info("restartPushSdk , scheduleInterval:"+scheduleInterval);
-                if (scheduleInterval>0) {
-                    if (mIsScheduleStarting) {
-                        log.info("restartPushSdk ignored , already scheduled");
-                        return;
+    public void triggetReconnect() {
+        executorService.submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        initPushParams();
                     }
-                    mIsScheduleStarting = true;
-                    log.info("restartPushSdk schedule after " + scheduleInterval + " ms" );
-                    executorService.schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            doRestartPushSdk();
-                        }
-                    },scheduleInterval, TimeUnit.MILLISECONDS);
-                } else {
-                    doRestartPushSdk();
-                }
-            }
-        });
+                });
+
     }
+
 
     public void setAutoStart(boolean pStart){
         Log.e(TAG, "setAutoStart:"+pStart);
         mAutoStart = pStart;
     }
 
-    private void doRestartPushSdk() {
+    private void doConnectPush() {
         Log.e(TAG,"before run restartPushSdk");
         mIsScheduleStarting = false;
         mLastRestartTimestampMs = SystemClock.elapsedRealtime();
@@ -566,20 +677,36 @@ public class PushSdkModule {
                         + " appID:" + mAppid
                         + " appKey:" + mAppKey
                         + " manufactor:" + mManufactor
-                        + " imei:" + mImei + " mac:" + mMac);
-                libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
-                libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
-                libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
-                libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei,
-                        mMac, "", mReconnectIntervalMs);
-                Log.e(TAG, "after run restartPushSdk");
+                        + " imei:" + mImei 
+						+ " androidid:" + mAndroidId
+						+ " mac:" + mMac);
+                initPushParams();
+            	libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+                Log.e(TAG, "after run doConnectPush");
             } else {
                 Log.d(TAG, "auto start is false, not calling native_pushLogin");
             }
         } else {
-            Log.e(TAG,"retry restartPushSdk");
-            restartPushSdk();
+            log.error("Can't doConnectPush, device info is empty");
         }
+    }
+
+    private void initPushParams() {
+        log.info("initPushParams  "
+                + " loadbalancer: " + mLoadbalancer
+                + " defaultIp: " + mDefaultIp
+                + " defaultPort: " + mDefaultPort
+                + " packageName: " + packageName
+                + " manufactorName: " + manufactorName
+                + " manufactorToken: " + manufactorToken
+                + " mOfflineTimeoutsec: " + mOfflineTimeoutsec
+                + " mRetryIntervalSec: " + mRetryIntervalSec
+                + " mRetryCount: " + mRetryCount
+                + " mDeadTimeouotSec: " + mDeadTimeouotSec);
+        libpushclient.native_setMFChannel(packageName, manufactorName, manufactorToken);
+        libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
+        libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
     }
 
     /**
@@ -611,6 +738,24 @@ public class PushSdkModule {
      */
     public String getDeviceid() {
         return mDevicetoken;
+    }
+
+    public void notifyPushUpstreamSent(final String msgid, final int errCode) {
+        log.info(String.format("notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                log.info(String.format("before run notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+                if (mPushCallback != null) {
+                    try {
+                        mPushCallback.onPushUpstreamSent(msgid, errCode);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                log.info(String.format("after run notifyPushUpstreamSent(%s, %d)", msgid, errCode));
+            }
+        });
     }
 
     public void notifyClientConnectStatus(final boolean isConnected) {
@@ -697,16 +842,26 @@ public class PushSdkModule {
         });
     }
 
-
-    public void notifyPushUpstreamSent(String pMsgID, int pErrorCode){
-        Log.e(TAG,String.format("notifyPushUpstreamSent(pMsgID=%s, pErrorCode=%d)", pMsgID, pErrorCode));
-        if (mPushCallback != null) {
-            try {
-                mPushCallback.notifyMessageSentResult(pMsgID, pErrorCode);
-            } catch (Exception e) {
-                Log.e(TAG, "notifyMessageSentResult message error:"+e.toString());
+    public void notifyPushShadowUpdated(final PushShadowMode mode, final String shadow) {
+        log.info(String.format("notifyPushShadowUpdated(mode=%s,shadow=%s)", mode.getStringValue(), shadow));
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                log.info("before run notifyPushShadowUpdated");
+                if (mPushCallback != null) {
+                    try {
+                        mPushCallback.onPushShadowUpdated(mode.getIntValue(), shadow);
+                    } catch (Exception e) {
+                        log.info(e.toString());
+                    }
+                }
+                log.info("after run notifyPushShadowUpdated");
             }
-        }
+        });
     }
 
+    public void init(String cacheDir) {
+        log.info(String.format("init(cacheDir=%s)", cacheDir));
+        mCacheDir = cacheDir;
+    }
 }

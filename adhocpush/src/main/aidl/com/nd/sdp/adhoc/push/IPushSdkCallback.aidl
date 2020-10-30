@@ -31,6 +31,22 @@ interface IPushSdkCallback {
      */
     void onPushShutdown();
 
-    //通知消息发送结果
-    void notifyMessageSentResult(String pMsgID, int pErrorCode);
+    /**
+     * 上行消息发送完成通知
+     *
+     * @param msgId
+     * @param content
+     */
+    void onPushUpstreamSent(String msgId, int errCode);
+
+    /**
+     * 通知本设备的影子更新
+     *
+     * @param mode 参考 @PushShadowMode
+     *             ShadowModeDevice(0), // 以设备ID作为影子记录ID
+     *             SHadowModeAlias(1);  // 以别名作为影子记录ID
+     * @param document 完整的影子信息，json格式
+     *                 格式见wiki https://dwz.cn/psTR5YYP
+     */
+    void onPushShadowUpdated(int mode, String document);
 }

@@ -11,6 +11,8 @@ import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
 
 import org.apache.log4j.Logger;
 
+import java.util.UUID;
+
 /**
  * date: 2017/4/7 0007
  * author: cbs
@@ -40,6 +42,51 @@ public class DeviceUtil {
 
     public static String getPseudoId() {
         return sPseudoID;
+    }
+
+    /**
+     * 获得设备唯一id，该方法不如getDeviceUUID精确，已经废弃
+     *
+     * @param context
+     * @return
+     */
+    @Deprecated
+    public static String getUniqueId(Context context) {
+        String androidID, serial;
+        if (context != null) {
+            androidID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        } else {
+            androidID = "unknown";
+        }
+        try {
+            serial = Build.SERIAL;
+        } catch (Exception exception) {
+            serial = "serial";
+        }
+        return androidID + serial;
+    }
+
+    /**
+     * 最终方案，获取设备ID
+     *
+     * @param context
+     * @param allowFirmwareUpdate
+     * @return
+     */
+    public static String getDeviceUUID(Context context, boolean allowFirmwareUpdate) {
+        String uniqueID = getUniqueId(context);
+        StringBuffer mostSigBitSB = new StringBuffer();
+        mostSigBitSB.append(uniqueID).append("/");
+        mostSigBitSB.append(Build.BRAND).append("/");
+        mostSigBitSB.append(Build.MODEL).append("/");
+        mostSigBitSB.append(Build.PRODUCT).append("/");
+        mostSigBitSB.append(Build.DEVICE).append("/");
+        mostSigBitSB.append(Build.MANUFACTURER).append("/");
+        mostSigBitSB.append(Build.ID);
+        if (allowFirmwareUpdate) {
+            mostSigBitSB.append("/").append(Build.VERSION.INCREMENTAL);
+        }
+        return new UUID(mostSigBitSB.toString().hashCode(), getUniqueId(context).hashCode()).toString();
     }
 
     private static String sPseudoIDLong =  Build.BOARD +
