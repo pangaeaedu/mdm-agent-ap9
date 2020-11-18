@@ -165,7 +165,9 @@ public class PushSdkModule {
         }
         mInited = true;
         libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
-        libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        if (mLoadbalancer != null) {
+            libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        }
         libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
         doConnectPush();
     }
@@ -461,6 +463,9 @@ public class PushSdkModule {
     @SuppressLint("DefaultLocale")
     public void setLoadBalancer(final String url) {
         log.info(String.format("setLoadBalancer(url=%s)", url));
+        if (url == null) {
+            return;
+        }
         mLoadbalancer = url;
         executorService.submit(new Runnable() {
             @SuppressLint("DefaultLocale")
@@ -705,7 +710,9 @@ public class PushSdkModule {
                 + " mDeadTimeouotSec: " + mDeadTimeouotSec);
         libpushclient.native_setMFChannel(packageName, manufactorName, manufactorToken);
         libpushclient.native_pushSetDefaultServerAddr(mDefaultIp, mDefaultPort);
-        libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        if (mLoadbalancer != null) {
+            libpushclient.native_pushSetLoadBalancer(mLoadbalancer);
+        }
         libpushclient.native_pushSetServerOptions(mOfflineTimeoutsec, mRetryIntervalSec, mRetryCount, mDeadTimeouotSec);
     }
 
