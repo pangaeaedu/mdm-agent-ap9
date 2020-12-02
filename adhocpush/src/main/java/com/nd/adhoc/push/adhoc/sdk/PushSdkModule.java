@@ -145,14 +145,14 @@ public class PushSdkModule {
         }
         mLoadbalancer = serverLbsUrl;
         log.warn("start push sdk" +
-                " , loadbalancer = " + mLoadbalancer +
-                " , defaultIp = " + mDefaultIp +
-                " , defaultPort = " + mDefaultPort +
-                " , appid = " + appid +
+//                " , loadbalancer = " + mLoadbalancer +
+//                " , defaultIp = " + mDefaultIp +
+//                " , defaultPort = " + mDefaultPort +
+//                " , appid = " + appid +
                 " , manufactorer = " + mManufactor +
-                " , imei = " + mImei +
-                " , mac = " + mMac +
-                " , androidid = " + mAndroidId +
+//                " , imei = " + mImei +
+//                " , mac = " + mMac +
+//                " , androidid = " + mAndroidId +
                 " , mOfflineTimeoutsec = " + mOfflineTimeoutsec +
                 " , mRetryIntervalSec = " + mRetryIntervalSec +
                 " , mRetryCount = " + mRetryCount +
@@ -335,13 +335,16 @@ public class PushSdkModule {
         mContext = context;
         setupLogConfigurator(context);
 
-        Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
+//        Log.e(TAG,String.format("startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
+        Log.e(TAG, "startPushSdk");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG,String.format("before run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
+                Log.e(TAG,("before run startPushSdk(appid=%s, appKey=%s, serverLbs=%s"));
+//                Log.e(TAG,String.format("before run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
                 doStartPushSdk(context, appid, appKey, serverLbsUrl, pushCallback);
-                Log.e(TAG,String.format("after run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
+                Log.e(TAG,("after run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)"));
+//                Log.e(TAG,String.format("after run startPushSdk(appid=%s, appKey=%s, serverLbs=%s)", appid, appKey != null ? appKey : "null", serverLbsUrl));
             }
         });
     }
@@ -404,7 +407,7 @@ public class PushSdkModule {
      * @param manufactorToken 厂商分配的设备Token
      */
     public synchronized void setMFChannel(final String packageName, final String manufactorName, final String manufactorToken) {
-        log.info(String.format("setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
+        log.info(String.format("setMFChannel(packageName=%s, manufactorName=%s)", packageName, manufactorName));
         this.packageName = packageName;
         this.manufactorName = manufactorName;
         this.manufactorToken = manufactorToken;
@@ -412,9 +415,9 @@ public class PushSdkModule {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                log.info(String.format("before run setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
+                log.info(String.format("before run setMFChannel(packageName=%s, manufactorName=%s)", packageName, manufactorName));
                 libpushclient.native_setMFChannel(packageName, manufactorName, manufactorToken);
-                log.info(String.format("after run setMFChannel(packageName=%s, manufactorName=%s, manufactorToken=%s)", packageName, manufactorName, manufactorToken));
+                log.info(String.format("after run setMFChannel(packageName=%s, manufactorName=%s)", packageName, manufactorName));
             }
         });
     }
@@ -462,7 +465,7 @@ public class PushSdkModule {
      */
     @SuppressLint("DefaultLocale")
     public void setLoadBalancer(final String url) {
-        log.info(String.format("setLoadBalancer(url=%s)", url));
+        log.info(String.format("setLoadBalancer(url=%s)", ""));
         if (url == null) {
             return;
         }
@@ -471,9 +474,9 @@ public class PushSdkModule {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                log.info(String.format("before run setLoadBalancer(url=%s)", url));
+                log.info(String.format("before run setLoadBalancer(url=%s)", ""));
                 libpushclient.native_pushSetLoadBalancer(url);
-                log.info(String.format("after run setLoadBalancer(url=%s)", url));
+                log.info(String.format("after run setLoadBalancer(url=%s)", ""));
             }
         });
     }
@@ -483,16 +486,16 @@ public class PushSdkModule {
      */
     @SuppressLint("DefaultLocale")
     public void setDefaultServerAddr(final String ip, final int port) {
-        log.info(String.format("setDefaultServerAddr(ip=%s,port=%d)", ip, port));
+        log.info(String.format("setDefaultServerAddr(ip=%s,port=%d)", "", 0));
         mDefaultIp = ip;
         mDefaultPort = port;
         executorService.submit(new Runnable() {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                log.info(String.format("before run setDefaultServerAddr(ip=%s,port=%d)", ip, port));
+                log.info(String.format("before run setDefaultServerAddr(ip=%s,port=%d)", "", 0));
                 libpushclient.native_pushSetDefaultServerAddr(ip, port);
-                log.info(String.format("after run setDefaultServerAddr(ip=%s,port=%d)", ip, port));
+                log.info(String.format("after run setDefaultServerAddr(ip=%s,port=%d)", "", 0));
             }
         });
     }
@@ -633,11 +636,11 @@ public class PushSdkModule {
         mIsScheduleStarting = false;
         mLastRestartTimestampMs = SystemClock.elapsedRealtime();
         Log.e(TAG,"restart push sdk" +
-                " , Loadbalancer = " + mLoadbalancer +
-                " , appid = " + mAppid +
-                " , manufactorer = " + mManufactor +
-                " , imei = " + mImei +
-                " , mac = " + mMac +
+//                " , Loadbalancer = " + mLoadbalancer +
+//                " , appid = " + mAppid +
+//                " , manufactorer = " + mManufactor +
+//                " , imei = " + mImei +
+//                " , mac = " + mMac +
                 " , androidid = " + mAndroidId);
         doNotifyClientConnectStatus(false);
         boolean needstart = false;
@@ -676,15 +679,16 @@ public class PushSdkModule {
         if (needstart) {
             if (mAutoStart) {
                 Log.d(TAG, "native_pushLogin start "
-                        + " loadbalancer: " + mLoadbalancer
-                        + " defaultIp: " + mDefaultIp
-                        + " defaultPort: " + mDefaultPort
-                        + " appID:" + mAppid
-                        + " appKey:" + mAppKey
-                        + " manufactor:" + mManufactor
-                        + " imei:" + mImei 
-						+ " androidid:" + mAndroidId
-						+ " mac:" + mMac);
+//                        + " loadbalancer: " + mLoadbalancer
+//                        + " defaultIp: " + mDefaultIp
+//                        + " defaultPort: " + mDefaultPort
+//                        + " appID:" + mAppid
+//                        + " appKey:" + mAppKey
+//                        + " manufactor:" + mManufactor
+//                        + " imei:" + mImei
+//						+ " androidid:" + mAndroidId
+//						+ " mac:" + mMac
+                );
                 initPushParams();
             	libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
                 Log.e(TAG, "after run doConnectPush");
@@ -698,12 +702,12 @@ public class PushSdkModule {
 
     private void initPushParams() {
         log.info("initPushParams  "
-                + " loadbalancer: " + mLoadbalancer
-                + " defaultIp: " + mDefaultIp
-                + " defaultPort: " + mDefaultPort
+//                + " loadbalancer: " + mLoadbalancer
+//                + " defaultIp: " + mDefaultIp
+//                + " defaultPort: " + mDefaultPort
                 + " packageName: " + packageName
                 + " manufactorName: " + manufactorName
-                + " manufactorToken: " + manufactorToken
+//                + " manufactorToken: " + manufactorToken
                 + " mOfflineTimeoutsec: " + mOfflineTimeoutsec
                 + " mRetryIntervalSec: " + mRetryIntervalSec
                 + " mRetryCount: " + mRetryCount
@@ -808,11 +812,11 @@ public class PushSdkModule {
     }
 
     public void notifyDeviceToken(final String deviceToken) {
-        Log.e(TAG,"notifyDeviceToken(deviceToken = " + deviceToken + ")");
+        Log.e(TAG,"notifyDeviceToken(deviceToken = " + "" + ")");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG,"before run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                Log.e(TAG,"before run notifyDeviceToken(deviceToken = " + "" + ")");
                 if (deviceToken != null && !deviceToken.equals(mDevicetoken)) {
                     //传进来新的token,把缓存的别名清掉
                     mAlias = null;
@@ -825,18 +829,20 @@ public class PushSdkModule {
                         e.printStackTrace();
                     }
                 }
-                Log.e(TAG,"after run notifyDeviceToken(deviceToken = " + deviceToken + ")");
+                Log.e(TAG,"after run notifyDeviceToken(deviceToken = " + "" + ")");
             }
         });
     }
 
     @SuppressLint("DefaultLocale")
     public void notifyPushMessage(final String appId, final int msgtype, final byte[] contenttype, final long msgid, final long msgTime, final String topic, final byte[] data, final String[] extraKeys, final String[] extraValues) {
-        Log.e(TAG,String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
+//        Log.e(TAG,String.format("notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
+        Log.e(TAG, "notifyPushMessage");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                Log.e(TAG,String.format("before run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
+                Log.e(TAG,String.format("before run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)"));
+//                Log.e(TAG,String.format("before run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
                 if (mPushCallback != null) {
                     try {
                         mPushCallback.onPushMessage(mAppid, msgtype, contenttype, msgid, msgTime, topic, data, extraKeys, extraValues);
@@ -844,7 +850,8 @@ public class PushSdkModule {
                         Log.e(TAG, "process push message error:"+e.toString());
                     }
                 }
-                Log.e(TAG,String.format("after run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
+//                Log.e(TAG,String.format("after run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)", appId, msgtype, msgid, msgTime, topic));
+                Log.e(TAG,String.format("after run notifyPushMessage(appid=%s, msgtype=%d, msgid=%d, msgtime=%d, topic=%s)"));
             }
         });
     }

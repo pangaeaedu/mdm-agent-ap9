@@ -192,7 +192,7 @@ public class AwsPushChannel extends BasePushChannel implements IPushChannel {
     private KeyStore loadKeystoreFromFileSystem() throws Exception {
         if (!AWSIotKeystoreHelper.isKeystorePresent(mIotInfoProvider.getEnvInfoProvider().getKeystoreFolder(),
                 mIotInfoProvider.getEnvInfoProvider().getKeystoreName())) {
-            Log.e(TAG, "Keystore " + mIotInfoProvider.getEnvInfoProvider().getKeystoreFolder()
+            Logger.d(TAG, "Keystore " + mIotInfoProvider.getEnvInfoProvider().getKeystoreFolder()
                     + "/" + mIotInfoProvider.getEnvInfoProvider().getKeystoreName() + " not found.");
             return null;
         }
@@ -201,12 +201,12 @@ public class AwsPushChannel extends BasePushChannel implements IPushChannel {
                 mIotInfoProvider.getEnvInfoProvider().getKeystoreFolder(),
                 mIotInfoProvider.getEnvInfoProvider().getKeystoreName(),
                 mIotInfoProvider.getEnvInfoProvider().getKeystorePassword())) {
-            Log.e(TAG, "Key/cert " + mIotInfoProvider.getEnvInfoProvider().getCertificateId() + " not found in " +
+            Logger.d(TAG, "Key/cert " + mIotInfoProvider.getEnvInfoProvider().getCertificateId() + " not found in " +
                     "keystore.");
             return null;
         }
 
-        Log.e(TAG, "Certificate " + mIotInfoProvider.getEnvInfoProvider().getCertificateId()
+        Logger.d(TAG, "Certificate " + mIotInfoProvider.getEnvInfoProvider().getCertificateId()
                 + " found in keystore - using for MQTT.");
         // load keystore from file into memory to pass on connection
         return AWSIotKeystoreHelper.getIotKeystore(mIotInfoProvider.getEnvInfoProvider().getCertificateId(),

@@ -21,6 +21,7 @@ import com.nd.adhoc.push.core.PushRecvDataImpl;
 import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.android.adhoc.basic.log.CrashAnalytics;
+import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.mdm.biz.env.MdmEvnFactory;
 import com.nd.android.mdm.util.cmd.CmdUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
@@ -127,7 +128,7 @@ public class AdhocPushChannel extends BasePushChannel {
             CrashAnalytics.INSTANCE.reportException(e);
         }
         PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
-        Log.e(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
+        Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
         PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);
 
     }
@@ -176,7 +177,7 @@ public class AdhocPushChannel extends BasePushChannel {
     private IPushSdkCallback.Stub mPushSdkCallback = new IPushSdkCallback.Stub() {
         @Override
         public void onPushDeviceToken(String deviceToken) {
-            Log.e(TAG, "onPushDeviceToken :" + deviceToken);
+            Logger.d(TAG, "onPushDeviceToken :" + deviceToken);
             for (IPushChannelConnectListener listener : mConnectListeners) {
                 if (listener instanceof IAdhocPushChannelConnectListener) {
                     ((IAdhocPushChannelConnectListener) listener).onPushDeviceToken(deviceToken);

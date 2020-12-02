@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.adhoc.basic.util.system.AdhocDeviceUtil;
 
 public class PushStoredDeviceInfoUtils {
@@ -22,7 +23,7 @@ public class PushStoredDeviceInfoUtils {
         PushSpConfigFactory configFactory = PushSpConfigFactory.getInstance();
         mDeviceMac = configFactory.getDeviceMac(pContext);
         if(!TextUtils.isEmpty(mDeviceMac)){
-            Log.d(TAG, "use cached device mac:"+mDeviceMac);
+            Logger.d(TAG, "use cached device mac:"+mDeviceMac);
             return mDeviceMac;
         }
 
@@ -30,7 +31,7 @@ public class PushStoredDeviceInfoUtils {
         // 因为我们曾经在ap7上遇到过无线网卡可更换的情况
         mDeviceMac = AdhocDeviceUtil.getEthernetMac();
         if(!TextUtils.isEmpty(mDeviceMac)){
-            Log.d(TAG, "use device lan mac:"+mDeviceMac);
+            Logger.d(TAG, "use device lan mac:"+mDeviceMac);
             configFactory.saveDeviceMac(pContext, mDeviceMac);
             return mDeviceMac;
         }
@@ -38,12 +39,12 @@ public class PushStoredDeviceInfoUtils {
         // 取不到有线，取wifi Mac
         mDeviceMac = AdhocDeviceUtil.getWifiMac(pContext);
         if(!TextUtils.isEmpty(mDeviceMac)){
-            Log.d(TAG, "use device wifi mac:"+mDeviceMac);
+            Logger.d(TAG, "use device wifi mac:"+mDeviceMac);
             configFactory.saveDeviceMac(pContext, mDeviceMac);
             return mDeviceMac;
         }
 
-        Log.d(TAG, "lan mac and wifi mac both not found");
+        Log.e(TAG, "lan mac and wifi mac both not found");
         return "";
     }
 }
