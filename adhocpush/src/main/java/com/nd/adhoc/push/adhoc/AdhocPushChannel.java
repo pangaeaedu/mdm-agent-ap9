@@ -118,6 +118,9 @@ public class AdhocPushChannel extends BasePushChannel {
         String pushLbsUrl = MdmEvnFactory.getInstance().getCurEnvironment().getPushLbs();
         String pushAppID = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppId();
         String pushAppKey = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppKey();
+        PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
+        Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
+        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);
         try {
             if (pContext != null) {
                 IntentFilter filter = new IntentFilter();
@@ -127,9 +130,6 @@ public class AdhocPushChannel extends BasePushChannel {
         } catch (Exception e) {
             CrashAnalytics.INSTANCE.reportException(e);
         }
-        PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
-        Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
-        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);
 
     }
 
