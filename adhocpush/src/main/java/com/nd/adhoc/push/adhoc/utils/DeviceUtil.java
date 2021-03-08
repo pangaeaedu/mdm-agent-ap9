@@ -133,7 +133,7 @@ public class DeviceUtil {
     public static String getND3RomVersion(String pDefault) {
         String systemVersion = null;
         String model = Build.MODEL;
-        if (model.contains("ND3")) {
+        if (model.toLowerCase().contains("nd3")) {
             systemVersion = SettingSDK.getSystemVersion("ro.product.firmware.version", pDefault);
         }
         return systemVersion;
