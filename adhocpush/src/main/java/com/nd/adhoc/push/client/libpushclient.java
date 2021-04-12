@@ -21,6 +21,12 @@ public class libpushclient {
     // 初始化push， 日志等
     public static native void native_pushInit(String logPath);
 
+    // 设置备用服务器的前缀
+    public static native void native_pushConfig(String config);
+
+    // 判断当前是否在使用备用服务器
+    public static native boolean native_pushIsUsingAlternativeServer();
+
     // 设置厂商推送通道（在PushLogin之前调用）
     public static native void native_setMFChannel(String packageName, String manufactorName, String manufactorToken);
 
@@ -40,7 +46,10 @@ public class libpushclient {
     public static native void native_pushDisconnect();
 
     // 发送上行消息
-    public static native int native_sendUpStreamMsg(String topic, String msgid, long ttlSeconds, String contentType, String content);
+    public static native int native_sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content, String extraHeaders);
+
+    //
+    public static native void native_pushSetReconnectPolicy(boolean reconnectOnKicked);
 
     // 标记消息已读
     public static native void native_pushAckMsg(long msgId);
