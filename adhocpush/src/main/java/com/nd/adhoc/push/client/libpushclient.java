@@ -7,6 +7,7 @@ public class libpushclient {
 
     static {
         try {
+            new Exception("lib push client debug").printStackTrace();
             System.loadLibrary("push_client");
         } catch (UnsatisfiedLinkError ule) {
           ule.printStackTrace();
