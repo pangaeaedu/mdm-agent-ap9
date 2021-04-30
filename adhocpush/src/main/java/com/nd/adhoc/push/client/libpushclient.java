@@ -2,12 +2,16 @@ package com.nd.adhoc.push.client;
 
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
+import com.nd.android.adhoc.basic.log.Logger;
 
 public class libpushclient {
 
     static {
         try {
-            new Exception("lib push client debug").printStackTrace();
+            StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
+            if (stackTraceElements != null && stackTraceElements.length > 3) {
+                Logger.d("libpushclient", "run static: " + Logger.getExtInfo(stackTraceElements[3]));
+            }
             System.loadLibrary("push_client");
         } catch (UnsatisfiedLinkError ule) {
           ule.printStackTrace();
