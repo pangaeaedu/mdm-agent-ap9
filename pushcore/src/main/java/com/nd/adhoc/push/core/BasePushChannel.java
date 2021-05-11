@@ -1,7 +1,7 @@
 package com.nd.adhoc.push.core;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

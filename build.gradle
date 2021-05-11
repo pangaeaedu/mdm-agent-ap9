@@ -2,49 +2,54 @@ buildscript {
 
     apply from: 'http://git.sdp.nd/adhoc-android/adhoc-android-doc/raw/master/build_config.gradle'
 
+    ext {
+        //框架，基础库
+        adhoc_basic_version = '2.1.638.a617770'
+
+        mdm_biz_version = '1.13.678.d4a52ab'
+        device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
+        deliver_version = '1.0.37.7cae020'
+        device_command_version = '1.1.87.24dfc01-hyk0.6.6.0opt-SNAPSHOT'
+        location_verison = '1.0.13.7af56f3'
+        adhoc_sdk_version = '1.2.19.2078-develop-SNAPSHOT'
+
+
+        // push版本现在由杨宏群负责发布
+        adhoc_push_util_version = '0.3.25.103.1dd4e37'
+
+        androidBuildToolsVersion = '29.0.2'
+        androidMinSdkVersion = 19
+        androidTargetSdkVersion = 29
+        androidCompileSdkVersion = 29
+        androidSupportSdkVersion = '28.0.0'
+        service_loader_version = '1.2.2'
+
+        gradlePluginVersion = '4.1.2'
+    }
+
     repositories {
         maven {
-            name 'nd nexus android-public'
+            allowInsecureProtocol = true
             url "http://nexus.sdp.nd/nexus/content/groups/android-public/"
         }
         mavenCentral()
         jcenter()
+        google()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradlePluginVersion"
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$sonar_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        classpath "com.nd.android.adhoc.basic:adhoc-router-register:1.8.444.a7a2727"
+        classpath "com.nd.android.adhoc.basic:adhoc-router-register:$adhoc_basic_version"
     }
 }
 
-ext {
-    //框架，基础库
-    adhoc_basic_version = '2.1.638.a617770'
-
-    mdm_biz_version = '1.13.678.d4a52ab'
-    device_control_version = '1.1.187.0557e79-hyk0.6.7.0opt-SNAPSHOT'
-    deliver_version = '1.0.37.7cae020'
-    device_command_version = '1.1.87.24dfc01-hyk0.6.6.0opt-SNAPSHOT'
-    location_verison = '1.0.13.7af56f3'
-    adhoc_sdk_version = '1.2.19.2078-develop-SNAPSHOT'
-
-
-    // push版本现在由杨宏群负责发布
-    adhoc_push_util_version = '0.3.25.103.1dd4e37'
-
-    androidBuildToolsVersion = '28.0.3'
-    androidMinSdkVersion = 18
-    androidTargetSdkVersion = 28
-    androidCompileSdkVersion = 28
-    androidSupportSdkVersion = '28.0.0'
-}
 
 allprojects {
     repositories {
         maven {
-            name 'nd nexus android-public'
+            allowInsecureProtocol = true
             url "http://nexus.sdp.nd/nexus/content/groups/android-public/"
         }
         mavenCentral()
@@ -53,6 +58,7 @@ allprojects {
         flatDir {
             dirs 'libs'
         }
+        google()
     }
     if (project != rootProject) {
         project.group = POM_GROUP_ID

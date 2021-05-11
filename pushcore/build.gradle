@@ -14,7 +14,7 @@ android {
         targetSdkVersion "$androidTargetSdkVersion".toInteger()
         multiDexEnabled true  // dex突破65535的限制
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         // 路由能力 在 编译期需要根据这个变量去根据模块创建类文件，实现分模块懒加载
         javaCompileOptions {
