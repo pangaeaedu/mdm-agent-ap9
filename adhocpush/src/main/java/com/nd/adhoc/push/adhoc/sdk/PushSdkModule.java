@@ -440,6 +440,8 @@ public class PushSdkModule {
                 log.info(String.format("before setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
                         offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
                 libpushclient.native_pushSetServerOptions(offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec);
+                //要重新login，否则服务端不会去变更心跳频率
+                libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
                 log.info(String.format("after setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
                         offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
             }
