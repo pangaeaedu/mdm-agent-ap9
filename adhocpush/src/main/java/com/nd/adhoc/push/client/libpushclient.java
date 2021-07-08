@@ -8,10 +8,7 @@ public class libpushclient {
 
     static {
         try {
-            StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
-            if (stackTraceElements != null && stackTraceElements.length > 3) {
-                Logger.d("libpushclient", "run static: " + Logger.getExtInfo(stackTraceElements[3]));
-            }
+            Logger.i("libpushclient", "run static: ");
             System.loadLibrary("push_client");
         } catch (UnsatisfiedLinkError ule) {
           ule.printStackTrace();
