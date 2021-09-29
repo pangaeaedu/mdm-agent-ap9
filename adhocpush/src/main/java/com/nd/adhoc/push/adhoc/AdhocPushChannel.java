@@ -191,7 +191,7 @@ public class AdhocPushChannel extends BasePushChannel {
                                     String[] extraKeys, String[] extraValues) {
             try {
                 for (IPushChannelDataListener listener : mDataListeners) {
-                    PushRecvDataImpl data = new PushRecvDataImpl(content);
+                    PushRecvDataImpl data = new PushRecvDataImpl(content, extraKeys, extraValues);
                     listener.onPushDataArrived(AdhocPushChannel.this, data);
                 }
             } catch (Exception e) {
