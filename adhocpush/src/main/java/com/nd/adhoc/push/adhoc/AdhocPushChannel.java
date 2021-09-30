@@ -15,6 +15,7 @@ import com.nd.adhoc.push.core.BasePushChannel;
 import com.nd.adhoc.push.core.IPushChannel;
 import com.nd.adhoc.push.core.IPushChannelConnectListener;
 import com.nd.adhoc.push.core.IPushChannelDataListener;
+import com.nd.adhoc.push.core.IPushLoginResultListener;
 import com.nd.adhoc.push.core.IPushSendData;
 import com.nd.adhoc.push.core.IPushSendResult;
 import com.nd.adhoc.push.core.PushRecvDataImpl;
@@ -228,6 +229,17 @@ public class AdhocPushChannel extends BasePushChannel {
         @Override
         public void onPushShadowUpdated(int mode, String document) throws RemoteException {
 
+        }
+
+        @Override
+        public void onPushLoginResult(int pCode) throws RemoteException {
+            try {
+                for (IPushLoginResultListener listener : mLoginResultListeners) {
+                    listener.onLoginResult(pCode);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 

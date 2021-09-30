@@ -809,6 +809,41 @@ public class PushSdkModule {
 
     }
 
+
+
+    public void notifyClientLoginResult(final int pCode) {
+        Log.e(TAG, "notifyClientLoginResult: " + pCode);
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(TAG, "before run notifyClientLoginResult: " + pCode);
+                doNotifyClientLoginResult(pCode);
+                Log.e(TAG, "after run notifyClientLoginResult: " + pCode);
+            }
+        });
+
+    }
+
+    private void doNotifyClientLoginResult(final int pCode) {
+        Log.e(TAG, "doNotifyClientLoginResult: " + pCode);
+
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(TAG, "before run doNotifyClientLoginResult: " + pCode);
+
+                if (mPushCallback != null) {
+                    try {
+                        mPushCallback.onPushLoginResult(pCode);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+    }
+
     public void notifyDeviceToken(final String deviceToken) {
         Log.e(TAG, "notify(value = " + deviceToken + ")");
         executorService.submit(new Runnable() {

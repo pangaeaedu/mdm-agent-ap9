@@ -29,4 +29,7 @@ public interface IPushChannel {
 
     void addDataListener(IPushChannelDataListener pListener);
     void removeDataListener(IPushChannelDataListener pListener);
+
+    void addLoginResultListener(IPushLoginResultListener pListener);
+    void removeLoginResultListener(IPushLoginResultListener pListener);
 }

@@ -11,6 +11,7 @@ import rx.Observable;
 public abstract class BasePushChannel implements IPushChannel {
     protected List<IPushChannelConnectListener> mConnectListeners = new CopyOnWriteArrayList<>();
     protected List<IPushChannelDataListener> mDataListeners = new CopyOnWriteArrayList<>();
+    protected List<IPushLoginResultListener> mLoginResultListeners = new CopyOnWriteArrayList<>();
 
     protected Context mContext = null;
 
@@ -54,5 +55,21 @@ public abstract class BasePushChannel implements IPushChannel {
         }
 
         mDataListeners.remove(pListener);
+    }
+
+    @Override
+    public void addLoginResultListener(IPushLoginResultListener pListener) {
+        if (mLoginResultListeners.contains(pListener)) {
+            return;
+        }
+        mLoginResultListeners.add(pListener);
+    }
+
+    @Override
+    public void removeLoginResultListener(IPushLoginResultListener pListener) {
+        if (!mLoginResultListeners.contains(pListener)) {
+            return;
+        }
+        mLoginResultListeners.remove(pListener);
     }
 }

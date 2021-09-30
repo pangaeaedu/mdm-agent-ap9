@@ -49,4 +49,11 @@ interface IPushSdkCallback {
      *                 格式见wiki https://dwz.cn/psTR5YYP
      */
     void onPushShadowUpdated(int mode, String document);
+
+    /**
+     * 登录结果通知
+     *
+     * @param pCode 错误码
+     */
+    void onPushLoginResult(int pCode);
 }

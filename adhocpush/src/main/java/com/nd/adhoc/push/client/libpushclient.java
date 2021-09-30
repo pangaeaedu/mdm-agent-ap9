@@ -109,7 +109,11 @@ public class libpushclient {
     }
 
     public static void onPushLoginResult(String appId, int errCode, String errMsg) {
-        PushSdkModule.getInstance().notifyClientConnectStatus(errCode==0);
+        if (errCode == 0) {
+            PushSdkModule.getInstance().notifyClientConnectStatus(true);
+        }
+
+        PushSdkModule.getInstance().notifyClientLoginResult(errCode);
     }
 
     public static void onPushDisconnected() {
