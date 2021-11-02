@@ -62,7 +62,8 @@ public class PushSdkModule {
 
     private int mReconnectIntervalMs = 10000;
 
-    private int mOfflineTimeoutsec = 0, mRetryIntervalSec = 0, mRetryCount = 0, mDeadTimeouotSec = 0;
+    // 默认用 20，3，3，60
+    private int mOfflineTimeoutsec = 20, mRetryIntervalSec = 3, mRetryCount = 3, mDeadTimeouotSec = 60;
 
     private IPushSdkCallback mPushCallback;
 
@@ -429,10 +430,15 @@ public class PushSdkModule {
     public void setServerOption(final int offlineTimeoutsec, final int retryIntervalSec, final int retryCount, final int deadTimeouotSec) {
         log.info(String.format("setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
                 offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
-        mOfflineTimeoutsec = offlineTimeoutsec;
-        mRetryIntervalSec = retryIntervalSec;
-        mRetryCount = retryCount;
-        mDeadTimeouotSec = deadTimeouotSec;
+        if (offlineTimeoutsec == 0 && retryIntervalSec == 0 && retryCount == 0 && deadTimeouotSec == 0) {
+            useDefServerOption();
+        } else {
+            mOfflineTimeoutsec = offlineTimeoutsec;
+            mRetryIntervalSec = retryIntervalSec;
+            mRetryCount = retryCount;
+            mDeadTimeouotSec = deadTimeouotSec;
+        }
+
         executorService.submit(new Runnable() {
             @SuppressLint("DefaultLocale")
             @Override
@@ -446,6 +452,13 @@ public class PushSdkModule {
                 log.info("restart native_pushLogin");
             }
         });
+    }
+
+    private void useDefServerOption() {
+        mOfflineTimeoutsec = 20;
+        mRetryIntervalSec = 3;
+        mRetryCount = 3;
+        mDeadTimeouotSec = 60;
     }
 
     /**
