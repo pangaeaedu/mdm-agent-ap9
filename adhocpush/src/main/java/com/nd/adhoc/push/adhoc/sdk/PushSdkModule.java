@@ -443,13 +443,13 @@ public class PushSdkModule {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                log.info(String.format("before setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
+                log.info(String.format("setServerOption(offlineTimeoutsec=%d, retryIntervalSec=%d, retryCount=%d, deadTimeouotSec=%d)",
                         offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec));
                 libpushclient.native_pushSetServerOptions(offlineTimeoutsec, retryIntervalSec, retryCount, deadTimeouotSec);
                 //要重新login，否则服务端不会去变更心跳频率
-                libpushclient.native_pushDisconnect();
-                libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
-                log.info("restart native_pushLogin");
+                //libpushclient.native_pushDisconnect();
+                //libpushclient.native_pushLogin(mAppid, mAppKey, mManufactor, mImei, mMac, mAndroidId, mReconnectIntervalMs);
+                //log.info("restart native_pushLogin");
             }
         });
     }
