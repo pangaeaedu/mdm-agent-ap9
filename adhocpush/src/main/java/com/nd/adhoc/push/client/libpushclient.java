@@ -29,7 +29,10 @@ public class libpushclient {
     // 判断当前是否在使用备用服务器
     public static native boolean native_pushIsUsingAlternativeServer();
 
-    // 设置厂商推送通道（在PushLogin之前调用）
+    // 发送ping，收到服务端pong后会回调 onPushPong
+    public static native int native_pushPing(String pingContent);
+
+   // 设置厂商推送通道（在PushLogin之前调用）
     public static native void native_setMFChannel(String packageName, String manufactorName, String manufactorToken);
 
     // 设置负载均衡服务
@@ -118,6 +121,10 @@ public class libpushclient {
 
     public static void onPushDisconnected() {
         PushSdkModule.getInstance().notifyClientConnectStatus(false);
+    }
+
+    public static void onPushPong(String pingContent) {
+        PushSdkModule.getInstance().notifyPushPong(pingContent);
     }
 }
 

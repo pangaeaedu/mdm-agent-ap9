@@ -278,6 +278,16 @@ public class PushSdkModule {
     }
 
     /**
+     * 发送Ping,服务端Pong之后会回调 notifyPong
+     *
+     * @return 0 成功
+     * 非0 失败
+     */
+    public int pushPing(String pingContent) {
+        return libpushclient.native_pushPing(pingContent);
+    }
+
+    /**
      * 发送上行消息
      *
      * @param topic       主题 ，默认为空
@@ -915,6 +925,10 @@ public class PushSdkModule {
                 log.info("after run notifyPushShadowUpdated");
             }
         });
+    }
+
+    public void notifyPushPong(final String pingContent) {
+        log.info(String.format("notifyPushPong(pingContent=%s)", pingContent));
     }
 
     public void init(String cacheDir) {
