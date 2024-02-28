@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <LinearLayout
+        android:id="@+id/post_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:gravity="center">
+        <TextView
+            android:gravity="center"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Post Json"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:layout_width="600dp"
+            android:layout_height="match_parent">
+        </EditText>
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Get"
+            android:background="@color/purple_500"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/get_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/post_Layout" >
+        <TextView
+            android:gravity="center"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Get Json"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:layout_width="600dp"
+            android:layout_height="match_parent">
+
+        </EditText>
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Post"
+            android:background="@color/purple_500"/>
+    </LinearLayout>
+
+    <GridLayout
+        android:id="@+id/function_list"
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:columnCount="4"
+        android:orientation="horizontal"
+        android:rowCount="3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/get_Layout">
+
+        <Button
+            android:id="@+id/btn_connectPush"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Connect Push"></Button>
+
+        <Button
+            android:id="@+id/btn_sendPanelInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_margin="10dp"
+            android:text="SendPanelInfo"
+            android:textAllCaps="false"></Button>
+    </GridLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
