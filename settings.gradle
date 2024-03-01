@@ -1,4 +1,1 @@
 include ':pushcore', ':adhocpush'
-//        ':awspushchannel',
-//        ':awsiotconfigpromethean',
-//        ':awsiotconfigcore'

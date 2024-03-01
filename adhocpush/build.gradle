@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 apply from: file('gradleScript/dev.gradle')
 
-if (!project.hasProperty('LOCAL_BUILD_ENV')) {
-    apply from: 'http://git.sdp.nd/adhoc-android/adhoc-android-doc/raw/master/maven_upload.gradle'
-}
+//if (!project.hasProperty('LOCAL_BUILD_ENV')) {
+//    apply from: 'http://git.sdp.nd/adhoc-android/adhoc-android-doc/raw/master/maven_upload.gradle'
+//}
 
 android {
 
