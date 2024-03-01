@@ -1,1 +1,14 @@
-include ':pushcore', ':adhocpush'
+include ':pushcore', ':adhocpush', ':agent'
+
+// 可配置工程
+// 配置后如果存在该目录，工程将包含该目录模块，否则不包含
+// 依赖配置采用try catch方式依赖此些工程
+def map = [:]
+
+map.each { dirPath, projectName ->
+    File file = new File('../' + dirPath)
+    if (file.isDirectory() && file.exists() && new File(file, "build.gradle").exists()) {
+        include projectName
+        project(projectName).projectDir = file
+    }
+}

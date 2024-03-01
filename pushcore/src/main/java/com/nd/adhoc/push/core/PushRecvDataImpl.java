@@ -1,7 +1,5 @@
 package com.nd.adhoc.push.core;
 
-import com.nd.android.adhoc.basic.common.util.AdhocDataCheckUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 

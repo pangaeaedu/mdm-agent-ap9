@@ -23,8 +23,6 @@ import com.nd.adhoc.push.core.enumConst.PushConnectStatus;
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.android.adhoc.basic.log.CrashAnalytics;
 import com.nd.android.adhoc.basic.log.Logger;
-import com.nd.android.mdm.biz.env.MdmEvnFactory;
-import com.nd.android.mdm.util.cmd.CmdUtil;
 import com.nd.sdp.adhoc.push.IPushSdkCallback;
 import com.nd.sdp.android.serviceloader.annotation.Service;
 
@@ -32,7 +30,6 @@ import java.util.UUID;
 
 import rx.Observable;
 import rx.functions.Func1;
-
 
 @Service(IPushChannel.class)
 public class AdhocPushChannel extends BasePushChannel {
@@ -113,12 +110,28 @@ public class AdhocPushChannel extends BasePushChannel {
 
 
     private void startAdhocPush(final Context pContext, IPushSdkCallback pushCallback) {
+//                "name": "Develop",
+//                "org": "mdm",
+//                "pushlbs": "http://iot-api.dev.101.com:1770/v5/sdk/access",
+//                "puship": "172.24.140.51",
+//                "pushport": 1730,
+//                "push_app_id":"mdm",
+//                "push_app_key":"oy1qjpP2FCuaYrmxXoaPcjV",
+//                "url": "http://drms.dev.web.nd",
+//                "downloadservicename":"dev_content_drms",
+//                "apm_server":"http://qc-report-collection.dev.web.nd/v1",
+//                "exception_report_host_name":"DEV",
+//                "cs_base_url":"https://betacs.101.com/v0.1/",
+//                "cs_base_down_url":"https://betacs.101.com/v0.1/",
+//                "uc_protocol_update_url":"",
+//                "uc_new_version_base_url":"https://uc-gateway.beta.101.com/v1.1/",
+//                "uc_app_id":"bc954f54-b9b9-4fae-97d2-b6a4085c3014",
 
-        String pushIp = MdmEvnFactory.getInstance().getCurEnvironment().getPushIp();
-        int pushSrvPort = MdmEvnFactory.getInstance().getCurEnvironment().getPushPort();
-        String pushLbsUrl = MdmEvnFactory.getInstance().getCurEnvironment().getPushLbs();
-        String pushAppID = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppId();
-        String pushAppKey = MdmEvnFactory.getInstance().getCurEnvironment().getPushAppKey();
+        String pushIp = "172.24.140.51";
+        int pushSrvPort = 1730;
+        String pushLbsUrl = "http://iot-api.dev.101.com:1770/v5/sdk/access";
+        String pushAppID = "mdm";
+        String pushAppKey = "oy1qjpP2FCuaYrmxXoaPcjV";
         PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
         Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
         PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);

@@ -21,23 +21,24 @@ dependencies {
 
 //    api 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0'
 
+    // 目前拆不掉, 先用著。
     api"com.nd.android.adhoc.basic:adhoc_util_permission:$adhoc_basic_version"
 
-    try {
-        api project(':mdm_env')
-    } catch (Exception ignored) {
-        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
-    }
+//    try {
+//        api project(':mdm_env')
+//    } catch (Exception ignored) {
+//        api("com.nd.android.mdm.biz:mdm_env:$mdm_biz_version")
+//    }
 
-    api("com.nd.android.adhoc.basic:adhoc_util_system:$adhoc_basic_version")
-    api("com.nd.android.adhoc.basic:adhoc_util_storage:$adhoc_basic_version")
+//    api("com.nd.android.adhoc.basic:adhoc_util_system:$adhoc_basic_version")
+//    api("com.nd.android.adhoc.basic:adhoc_util_storage:$adhoc_basic_version")
 
-    api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
+//    api("com.nd.android.mdm.biz:mdm_util_cmd:$mdm_biz_version")
 
-    api("com.nd.android.adhoc.basic:adhoc_basic_log:$adhoc_basic_version")
+//    api("com.nd.android.adhoc.basic:adhoc_basic_log:$adhoc_basic_version")
 
-    compile "com.nd.sdp.android.serviceloader:service-loader-annotation:$service_loader_version"
-    annotationProcessor "com.nd.sdp.android.serviceloader:service-loader-compiler:$service_loader_version"
+//    compile "com.nd.sdp.android.serviceloader:service-loader-annotation:$service_loader_version"
+//    annotationProcessor "com.nd.sdp.android.serviceloader:service-loader-compiler:$service_loader_version"
 
 }
 
