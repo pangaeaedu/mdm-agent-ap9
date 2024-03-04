@@ -5,6 +5,7 @@ plugins {
 def androidRepoCommitId = "git rev-parse --short HEAD".execute().text.trim()
 def LOCAL_ENV_VALUE = project.hasProperty('LOCAL_BUILD_ENV')
 def realVersion = VERSION_NAME + "." + androidRepoCommitId
+apply from: file('gradleScript/dev.gradle')
 
 android {
     compileSdkVersion "$androidCompileSdkVersion".toInteger()
@@ -34,8 +35,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

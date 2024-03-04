@@ -1,5 +1,5 @@
 dependencies {
-
+    compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 //    try {
 //        api project(':adhoc_biz_ui')
 //    } catch (Exception ignored) {
@@ -24,6 +24,7 @@ dependencies {
 //        api("com.nd.android.adhoc:mdm_biz_sdk:$mdm_biz_sdk_version") {
 //        }
 //    }
+    api("com.nd.android.adhoc.basic:adhoc_basic_common:$adhoc_basic_version")
     try {
         api project(':adhocpush')
     } catch (Exception ignored) {
@@ -32,6 +33,7 @@ dependencies {
             exclude group:'com.nd.android.mdm.biz' ,module:'mdm_biz_common'
         }
     }
+
 //
 //
 //    try{
