@@ -6,6 +6,32 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <include layout="@layout/content_main" />
+    <GridLayout
+        android:id="@+id/function_list"
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:columnCount="4"
+        android:orientation="horizontal"
+        android:rowCount="3">
+
+        <Button
+            android:id="@+id/btn_connectPush"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Connect Push"></Button>
+
+        <Button
+            android:id="@+id/btn_sendPanelInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_margin="10dp"
+            android:text="SendPanelInfo"
+            android:textAllCaps="false"></Button>
+    </GridLayout>
 
 </LinearLayout>

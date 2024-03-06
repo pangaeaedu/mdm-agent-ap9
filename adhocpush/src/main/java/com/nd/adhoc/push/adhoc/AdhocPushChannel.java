@@ -7,8 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
 import com.nd.adhoc.push.core.BasePushChannel;
@@ -127,11 +128,11 @@ public class AdhocPushChannel extends BasePushChannel {
 //                "uc_new_version_base_url":"https://uc-gateway.beta.101.com/v1.1/",
 //                "uc_app_id":"bc954f54-b9b9-4fae-97d2-b6a4085c3014",
 
-        String pushIp = "172.24.140.51";
+        String pushIp = "push.dev.apse1.ndpg.xyz";
         int pushSrvPort = 1730;
         String pushLbsUrl = "http://iot-api.dev.101.com:1770/v5/sdk/access";
-        String pushAppID = "mdm";
-        String pushAppKey = "oy1qjpP2FCuaYrmxXoaPcjV";
+        String pushAppID = "ap9";
+        String pushAppKey = "PFbAxSOucjOKLfv1p2eIRbD";
         PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
         Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
         PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);

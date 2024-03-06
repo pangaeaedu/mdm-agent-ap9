@@ -3,6 +3,7 @@ package com.nd.mdm.communicate;
 import android.content.Context;
 import android.util.Log;
 
+import com.nd.adhoc.push.adhoc.AdhocPushChannel;
 import com.nd.adhoc.push.adhoc.IAdhocPushChannelConnectListener;
 import com.nd.adhoc.push.adhoc.sdk.PushSdkModule;
 import com.nd.adhoc.push.client.libpushclient;
@@ -193,13 +194,17 @@ public class PushModule {
     }
 
     private void initPushChannel() {
-        Iterator<IPushChannel> iterator = AnnotationServiceLoader.load(IPushChannel.class)
-                .iterator();
+        //同一Module无需使用AnnotationServiceLoader调用。
+//        Iterator<IPushChannel> iterator = AnnotationServiceLoader.load(IPushChannel.class)
+//                .iterator();
+//        List<IPushChannel> channels = new ArrayList();
+//        while (iterator.hasNext()) {
+//            IPushChannel channel = iterator.next();
+//            channels.add(channel);
+//        }
+
         List<IPushChannel> channels = new ArrayList();
-        while (iterator.hasNext()) {
-            IPushChannel channel = iterator.next();
-            channels.add(channel);
-        }
+        channels.add(new AdhocPushChannel());
 
         if (channels.isEmpty()) {
             throw new RuntimeException("could not load any push channel");
@@ -208,9 +213,27 @@ public class PushModule {
         mPushChannel = channels.get(0);
         mPushChannel.addConnectListener(mChannelConnectListener);
         mPushChannel.addDataListener(mChannelDataListener);
+        mPushChannel.init(mContext)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Boolean pBoolean) {
+                        Logger.i(TAG, "init push channel result:" + pBoolean);
+                    }
+                });
     }
 
-    PushModule() {
+    public PushModule() {
         Log.i(TAG, "init push module");
         mContext = AdhocBasicConfig.getInstance().getAppContext();
         mConnectListeners = new CopyOnWriteArrayList();

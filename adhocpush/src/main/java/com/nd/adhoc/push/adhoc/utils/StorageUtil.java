@@ -30,7 +30,6 @@ public class StorageUtil {
         if (DeviceUtil.isND3Device()) {
             return ND3_SDCARD_PATH;
         }
-
         File sdDir;
         boolean sdCardExist = isSdCardExist();  //判断sd卡是否存在
         if (sdCardExist) {
