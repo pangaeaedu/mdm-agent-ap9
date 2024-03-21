@@ -700,7 +700,7 @@ public class PushSdkModule {
         }
         if (needstart) {
             if (mAutoStart) {
-                Log.d(TAG, "native_pushLogin start "
+                Log.d(TAG, "native_pushLogin start                         "
                         + " param1: " + mLoadbalancer
                         + " param2: " + mDefaultIp
                         + " param3: " + mDefaultPort

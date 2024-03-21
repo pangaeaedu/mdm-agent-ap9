@@ -1,6 +1,7 @@
 package com.nd.mdm.communicate;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.nd.adhoc.push.adhoc.AdhocPushChannel;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,6 +58,7 @@ public class PushModule {
     }
 
     public int sendUpStreamMsg(String msgid, long ttlSeconds, String contentType, String content) {
+        //TODO:
         return sendUpStreamMsg("", msgid, ttlSeconds, contentType, content);
     }
 
@@ -69,6 +72,10 @@ public class PushModule {
 
     public int sendUpStreamMsg(String topic, String msgid, long ttlSeconds, String contentType, String content) {
         PushConnectStatus status = mPushChannel.getCurrentStatus();
+        if (TextUtils.isEmpty(msgid)) {
+            msgid = UUID.randomUUID().toString();
+        }
+        Logger.i(TAG, "sendUpStreamMsg: getCurrentStatus =  " + status);
         if (status != PushConnectStatus.Connected) {
             cacheUpStreamMsg(topic, msgid, ttlSeconds, contentType, content);
 //            start();
@@ -76,6 +83,10 @@ public class PushModule {
         }
 
         return PushSdkModule.getInstance().sendUpStreamMsg(topic, msgid, ttlSeconds, contentType, content);
+    }
+
+    public String getDeviceToken() {
+        return PushSdkModule.getInstance().getDeviceid();
     }
 
     private void resendMsgThenClearCache() {
@@ -240,6 +251,10 @@ public class PushModule {
 
         initMessageReceiver();
         initPushChannel();
+    }
+
+    public void fireConnectatusEvent() {
+        notifyConnectStatus();
     }
 
     public void start() {

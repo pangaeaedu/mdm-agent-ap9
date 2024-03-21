@@ -38,6 +38,17 @@ dependencies {
     } catch (Exception ignored) {
         api("com.nd.sdp.android:pushcore:$adhoc_push_util_version")
     }
+    try {
+        api project(':adhoc_basic_ui')
+    } catch (Exception ignored) {
+        api("com.nd.android.adhoc.basic:adhoc_basic_ui:$adhoc_basic_version")
+    }
+    try {
+        api project(':adhoc_basic_control')
+    } catch (Exception ignored) {
+        api("com.nd.android.adhoc:adhoc_basic_control:$device_control_version") {
+        }
+    }
 
 //
 //

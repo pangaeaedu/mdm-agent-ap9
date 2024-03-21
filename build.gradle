@@ -16,9 +16,12 @@ buildscript {
 
         // push版本现在由杨宏群负责发布
         adhoc_push_util_version = '0.3.25.103.1dd4e37'
-
+        //对应adhoc-assistant-biz工程
+        adhoc_biz_version = '1.22.251.7d1b7d0.releasemerge'
+        device_control_version = '1.23.753.63ad2a8a.hykedboxadapter'
+        device_command_version = '2.11.598.782de66.releasenop2p'
         androidBuildToolsVersion = '29.0.2'
-        androidMinSdkVersion = 19
+        androidMinSdkVersion = 21
         androidTargetSdkVersion = 29
         androidCompileSdkVersion = 29
         androidSupportSdkVersion = '28.0.0'

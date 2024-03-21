@@ -19,10 +19,20 @@ public class MdmAp9Application extends Application {
         AdhocBasicConfig.getInstance().init(this);
     }
 
+//    protected List<AdhocPermissionRequestAbs> getPermissionList() {
+//        List<AdhocPermissionRequestAbs> permissions = new ArrayList<>();
+//        permissions.add(new PermissionRequest_WriteExternalStorage());
+//        permissions.add(new PermissionRequest_Admin());
+//
+//        return permissions;
+//    }
+
     @Override
     public final void onCreate() {
         super.onCreate();
         ValueConfig.setDefault(AdhocRobustUtil.runFormat(System.currentTimeMillis(), getPackageName(), "yyyy-MM-dd HH:mm:ss"));
+
+//        AdhocPermissionManager.getInstance().addPermissionRequest(getPermissionList());
 
         PACKAGE_NAME = getPackageName();
     }

@@ -152,7 +152,7 @@ public class AdhocPushRequestOperator {
                 .doOnSubscribe(new Action0() {
                     @Override
                     public void call() {
-                        mPushModel.sendUpStreamMsg(finalMsgid, ttlMillSeconds / 1000, contentType, content);
+                        mPushModel.sendUpStreamMsg("sync_res_ap9", finalMsgid, ttlMillSeconds / 1000, contentType, content);
                     }
                 });
     }

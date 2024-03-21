@@ -4,16 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Panel Info" />
+    <EditText
+        android:id="@+id/edt_panel_info"
+        android:layout_width="800dp"
+        android:layout_height="200dp"
+        ></EditText>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MDM Agent Remote" />
 
     <GridLayout
         android:id="@+id/function_list"
-        android:layout_width="600dp"
+        android:layout_width="800dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:columnCount="4"
         android:orientation="horizontal"
-        android:rowCount="3">
+        android:rowCount="5">
 
         <Button
             android:id="@+id/btn_connectPush"
@@ -24,14 +39,89 @@
             android:text="Connect Push"></Button>
 
         <Button
-            android:id="@+id/btn_sendPanelInfo"
+            android:id="@+id/btn_sendHello"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_row="0"
             android:layout_column="1"
             android:layout_margin="10dp"
-            android:text="SendPanelInfo"
+            android:text="Send Hello"
             android:textAllCaps="false"></Button>
+        <Button
+            android:id="@+id/btn_enroll"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:text="Enroll"
+            android:textAllCaps="false"></Button>
+    </GridLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Local Device Control"/>
+
+    <GridLayout
+        android:id="@+id/function_list_local"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="5"
+        android:orientation="horizontal"
+        android:rowCount="5">
+
+        <Button
+            android:id="@+id/btn_power_reboot"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:text="Powe Reboot"
+            android:textAllCaps="false"></Button>
+        <Button
+            android:id="@+id/btn_screen_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Screen Lock"></Button>
+
+        <Button
+            android:id="@+id/btn_screen_setBright_light"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:text="Screen set bright light"
+            android:textAllCaps="false"></Button>
+
+        <Button
+            android:id="@+id/btn_screen_setBright_dark"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:text="Screen set bright dark"
+            android:textAllCaps="false"></Button>
+
+        <Button
+            android:id="@+id/btn_open_wifi"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Open wifi"></Button>
+        <Button
+            android:id="@+id/btn_notify_system"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Notify System"></Button>
+        <Button
+            android:id="@+id/btn_notify_alert"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:textAllCaps="false"
+            android:text="Notify Alert"></Button>
+
     </GridLayout>
 
 </LinearLayout>

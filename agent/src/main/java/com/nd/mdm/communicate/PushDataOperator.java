@@ -1,54 +1,103 @@
 package com.nd.mdm.communicate;
 
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.Pair;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.nd.android.adhoc.basic.common.exception.AdhocException;
 import com.nd.android.adhoc.basic.common.util.AdhocDataCheckUtils;
+import com.nd.android.adhoc.basic.frame.api.initialization.AdhocAppInitManager;
+import com.nd.android.adhoc.basic.frame.api.initialization.AdhocBlockingException;
+import com.nd.android.adhoc.basic.frame.api.initialization.IAdhocInitStatusListener;
 import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.adhoc.basic.util.string.AdhocMD5Util;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PushDataOperator {
     private static final String TAG = "PushDataOperator";
 
-    boolean isPushMsgTypeMatche(int pPushMsgType) {
-        return pPushMsgType == 1;
-    }
+    private final List<Pair<String, Map<String, String>>> mCacheMsg = new CopyOnWriteArrayList<>();
 
+    private final AtomicBoolean mAllowSend = new AtomicBoolean(false);
 
-    void onPushDataArrived(@NonNull String pData, @Nullable Map<String, String> pExtraInfos) {
-
-        String message_id = "";
-        try {
-            JSONObject object = new JSONObject(pData);
-            message_id = object.optString("message_id");
-        } catch (JSONException e) {
-            Logger.w(TAG, "get msgid error: " + e);
+    private IAdhocInitStatusListener mAdhocInitStatusListener = new IAdhocInitStatusListener() {
+        @Override
+        public void onIniting(@NonNull String pInitProgressMsg) {
+            mAllowSend.set(false);
         }
-        Logger.d(TAG, "onPushDataArrived, message_id = " + message_id);
 
-        // 如果数据不对，就强制塞错误码进去
-        if (!checkHash(pData, pExtraInfos)) {
-            try {
-                JSONObject jsonObject = new JSONObject(pData);
-                jsonObject.put("code", 10099);
-                jsonObject.put("message", "The original data of the data has been tampered");
-
-                pData = jsonObject.toString();
-            } catch (JSONException e) {
-                Logger.w(TAG, "check data tampered error: " + e);
+        @Override
+        public void onInitSuccess() {
+            AdhocAppInitManager.getInstance().getInitOperator().removeInitStatusListener(this);
+            mAllowSend.set(true);
+            if (mCacheMsg.isEmpty()) {
+                return;
             }
+
+            for (Pair<String, Map<String, String>> item : mCacheMsg) {
+
+                Log.e(TAG, "init success, post all hold msg");
+                onPushDataArrived(item.first, item.second);
+            }
+
+            mCacheMsg.clear();
         }
 
-        AdhocPushRequestOperator.receiveFeedback(pData);
+        @Override
+        public boolean onInitFailed(@NonNull AdhocException pException) {
+            // 阻塞造成的，不处理
+            if (pException instanceof AdhocBlockingException) {
+                return false;
+            }
+            AdhocAppInitManager.getInstance().getInitOperator().removeInitStatusListener(this);
+            return false;
+        }
+    };
+
+    public PushDataOperator() {
+        super();
+
+        AdhocAppInitManager.getInstance().getInitOperator().addInitStatusListener(mAdhocInitStatusListener);
     }
 
+    public boolean isPushMsgTypeMatche(int pPushMsgType) {
+        return pPushMsgType == 0;
+    }
+
+    public void onPushDataArrived(@NonNull String pData, @Nullable Map<String, String> pExtraInfos) {
+        if (TextUtils.isEmpty(pData)) {
+            Logger.w(TAG, "onPushDataArrived: Cmd message bytes is null");
+            return;
+        }
+
+        if (!mAllowSend.get()) {
+            mCacheMsg.add(new Pair<>(pData, pExtraInfos));
+            return;
+        }
+
+        boolean checkHash = checkHash(pData, pExtraInfos);
+        Logger.d(TAG, "checkHash result = " + checkHash);
+
+        // hash 校验不通过，证明数据不正确，可能被篡改，也可能数据丢失
+        if (!checkHash) {
+            return;
+        }
+
+        Logger.i(TAG, "onPushDataArrived ");
+        //TODO: 这里实现处理cmdReceived
+ //       MdmCmdReceiveFactory.doCmdReceived(pData, AdhocCmdFromTo.MDM_CMD_DRM, AdhocCmdFromTo.MDM_CMD_DRM);
+//        AdhocProcessedCmdManager.getInstance().onCmdReceived(pData);
+    }
 
     private boolean checkHash(@NonNull String pData, @Nullable Map<String, String> pExtraInfos) {
+        Logger.d(TAG, "checkHash ");
         if (!AdhocDataCheckUtils.isMapEmpty(pExtraInfos)
                 && pExtraInfos.containsKey("cert")) {
             // 不为空，判断是否需要校验数据
@@ -56,13 +105,37 @@ public class PushDataOperator {
             try {
                 dataHash = AdhocMD5Util.sha1Encode(pData+"ʐ%վ]ȩĿʮբ8ڴzϊm¢dl");
             } catch (Exception e) {
-                Logger.w(TAG, "check data error: " + e);
+                e.printStackTrace();
             }
 
             dataHash = dataHash == null ? "" : dataHash;
 
             String cert = pExtraInfos.get("cert");
-            return dataHash.equals(cert);
+            if (!dataHash.equals(cert)) {
+                try {
+//                    ICmdContent_MDM cmdContent = MdmCmdHelper.commandParsing(pData, AdhocCmdFromTo.MDM_CMD_DRM, AdhocCmdFromTo.MDM_CMD_DRM, AdhocCmdType.CMD_TYPE_STATUS);
+//                    Logger.d(TAG, "checkHash, sessionId: " + cmdContent.getSessionId() + ", cmdName = " + cmdContent.getCmdName());
+//
+//                    String cmdName = cmdContent.getCmdName();
+//                    if (TextUtils.isEmpty(cmdName)) {
+//                        cmdName = "unknow_cmd";
+//                    }
+//
+//                    JSONObject errorData = new JSONObject();
+//                    errorData.put("result", pData);
+//
+//                    MdmResponseHelper.createResponseBase(cmdName, "", cmdContent.getSessionId(), cmdContent.getTo(), System.currentTimeMillis())
+//                            .setSendVersion(cmdContent.getSendVersion())
+//                            .setErrorCode(ErrorCode.FAILED)
+//                            .setMsgCode(10099)
+//                            .setMsg("The original data of the command has been tampered")
+//                            .setJsonData(errorData)
+//                            .post();
+                } catch (Exception e) {
+                    Logger.e(TAG, "checkHash, parsing cmd content error, result is not feedback: " + e);
+                }
+                return false;
+            }
         }
 
         return true;

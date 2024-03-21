@@ -128,14 +128,23 @@ public class AdhocPushChannel extends BasePushChannel {
 //                "uc_new_version_base_url":"https://uc-gateway.beta.101.com/v1.1/",
 //                "uc_app_id":"bc954f54-b9b9-4fae-97d2-b6a4085c3014",
 
+//        String pushIp = "push.dev.apse1.ndpg.xyz";
+//        int pushSrvPort = 1730;
+//        String pushLbsUrl ="";
+//        String pushAppID = "ap9";
+//        String pushAppKey = "W4J5KaFnaGsStWXBcoDstP1";
+//        PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
+//        Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
+//        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, null, pushCallback);
+
         String pushIp = "push.dev.apse1.ndpg.xyz";
         int pushSrvPort = 1730;
-        String pushLbsUrl = "http://iot-api.dev.101.com:1770/v5/sdk/access";
-        String pushAppID = "ap9";
-        String pushAppKey = "PFbAxSOucjOKLfv1p2eIRbD";
+        String pushLbsUrl ="";
+        String pushAppID = "mdm";
+        String pushAppKey = "b7WiPwD4M7JSb5nKbVOXvdg";
         PushSdkModule.getInstance().setDefaultServerAddr(pushIp,pushSrvPort);
         Logger.d(TAG, "startAdhocPush appid:" + pushAppID + " appKey:" + pushAppKey + " url:" + pushLbsUrl );
-        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, pushLbsUrl, pushCallback);
+        PushSdkModule.getInstance().startPushSdk(pContext, pushAppID, pushAppKey, null, pushCallback);
         try {
             if (pContext != null) {
                 IntentFilter filter = new IntentFilter();
