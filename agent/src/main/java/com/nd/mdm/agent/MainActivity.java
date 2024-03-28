@@ -14,7 +14,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
+import com.nd.android.adhoc.basic.common.exception.AdhocException;
+import com.nd.android.adhoc.basic.common.toast.AdhocToastModule;
+import com.nd.android.adhoc.basic.frame.api.initialization.AdhocAppInitManager;
+import com.nd.android.adhoc.basic.frame.api.initialization.IAdhocInitStatusListener;
 import com.nd.mdm.communicate.AdhocPushRequestOperator;
 import com.nd.mdm.communicate.PushModule;
 import com.nd.mdm.device_control.Ap9Control_Info;
@@ -40,8 +46,36 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         initPermission();
-
+        initAdhoc();
         initUI();
+    }
+
+    private final IAdhocInitStatusListener mInitStatusListener = new IAdhocInitStatusListener() {
+        @Override
+        public void onIniting(@NonNull String pInitProgressMsg) {
+        }
+
+        @Override
+        public void onInitSuccess() {
+        }
+
+        @Override
+        public boolean onInitFailed(@NonNull AdhocException pException) {
+            return doOnInitError(pException);
+        }
+    };
+
+    protected boolean doOnInitError(Throwable pThrowable) {
+        AdhocToastModule.getInstance().showToast(getString(R.string.adhoc_frame_init_failed));
+        onBackPressed();
+        return true;
+    }
+
+    private void initAdhoc() {
+        AdhocAppInitManager.getInstance().getInitOperator().addInitStatusListener(mInitStatusListener);
+
+        // 照样调用，内部去保证不会重复调用
+        AdhocAppInitManager.getInstance().getInitOperator().startInit();
     }
 
     private void initUI() {
@@ -87,7 +121,7 @@ public class MainActivity extends Activity {
 
         Button btnEnroll = findViewById(R.id.btn_enroll);
         btnEnroll.setOnClickListener(v -> {
-            mPushModule.sendUpStreamMsg("sync_res_ap9", null, 20, "", Ap9Control_hardware.makeContentHardwareInfo());
+            mPushModule.sendUpStreamMsg("activate_ap9", null, 20, "", Ap9Control_hardware.makeContentHardwareInfo());
             Toast.makeText(MainActivity.this, "Enroll OK!", Toast.LENGTH_SHORT).show();
         });
 
@@ -113,12 +147,12 @@ public class MainActivity extends Activity {
 
         Button btnNotifySystem = findViewById(R.id.btn_notify_system);
         btnNotifySystem.setOnClickListener(v -> {
-            Ap9Control_Info.Notify(mContext);
+            Ap9Control_Info.notify(mContext);
         });
 
         Button btnNotifyAlert = findViewById(R.id.btn_notify_alert);
         btnNotifyAlert.setOnClickListener(v -> {
-            Ap9Control_Info.Alert(mContext);
+            Ap9Control_Info.alert(mContext, "ButtonTest", "This is a button test alert!");
         });
 
         Button btnOpenWifi = findViewById(R.id.btn_open_wifi);

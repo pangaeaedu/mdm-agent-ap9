@@ -52,12 +52,11 @@ public class Ap9Control_hardware {
     public static String makeContentHardwareInfo() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("device_token", PushSdkModule.getInstance().getDeviceid());
+            jsonObject.put("push_id", PushSdkModule.getInstance().getDeviceid());
             JSONObject hardwareObject = new JSONObject();
-            hardwareObject.put("push_id", PushSdkModule.getInstance().getDeviceid());
             hardwareObject.put("serial_no", AdhocDeviceUtil.getAndroidId(context));
             hardwareObject.put("cpu_sn", getCPUSerial());
-            hardwareObject.put("imei", AdhocDeviceUtil.getIMEI(context));
+            hardwareObject.put("imei", "");
             hardwareObject.put("wifi_mac", AdhocDeviceUtil.getWifiMac(context));
             hardwareObject.put("btooth_mac", AdhocDeviceUtil.getBloothMac());
             hardwareObject.put("mac", AdhocDeviceUtil.getLocalMacAddressFromIp());

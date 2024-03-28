@@ -14,12 +14,16 @@ import com.nd.android.adhoc.basic.frame.api.initialization.AdhocBlockingExceptio
 import com.nd.android.adhoc.basic.frame.api.initialization.IAdhocInitStatusListener;
 import com.nd.android.adhoc.basic.log.Logger;
 import com.nd.android.adhoc.basic.util.string.AdhocMD5Util;
+import com.nd.mdm.command.CommandFromTo;
+import com.nd.mdm.command.MdmCmdManager;
+import com.nd.sdp.android.serviceloader.annotation.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Service(PushDataOperator.class)
 public class PushDataOperator {
     private static final String TAG = "PushDataOperator";
 
@@ -78,6 +82,7 @@ public class PushDataOperator {
         }
 
         if (!mAllowSend.get()) {
+            Logger.w(TAG, "mAllowSend is false!");
             mCacheMsg.add(new Pair<>(pData, pExtraInfos));
             return;
         }
@@ -91,8 +96,8 @@ public class PushDataOperator {
         }
 
         Logger.i(TAG, "onPushDataArrived ");
-        //TODO: 这里实现处理cmdReceived
- //       MdmCmdReceiveFactory.doCmdReceived(pData, AdhocCmdFromTo.MDM_CMD_DRM, AdhocCmdFromTo.MDM_CMD_DRM);
+        MdmCmdManager.doCmdReceived(pData, CommandFromTo.MDM_CMD_DRM, CommandFromTo.MDM_CMD_DRM);
+
 //        AdhocProcessedCmdManager.getInstance().onCmdReceived(pData);
     }
 
