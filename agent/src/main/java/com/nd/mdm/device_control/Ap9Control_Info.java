@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import androidx.core.app.NotificationCompat;
@@ -16,6 +18,7 @@ import com.nd.android.adhoc.basic.common.AdhocBasicConfig;
 import com.nd.mdm.agent.R;
 
 public class Ap9Control_Info {
+    static final String topicAP9 = "activate_ap9";
     static final Context context = AdhocBasicConfig.getInstance().getAppContext();
     static String deviceUUID = DeviceUtil.getDeviceUUID(context, false);
     static String mManufactor = DeviceUtil.getManufactorer();
@@ -29,7 +32,7 @@ public class Ap9Control_Info {
                 "AndroidId: " + mAndroidId + "\n";
     }
 
-    public static void Notify(Context mContext) {
+    public static void notify(Context mContext) {
         // 创建通知渠道（仅需要在 Android 8.0（API 级别 26）及更高版本上创建）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("channel_id", "Channel Name", NotificationManager.IMPORTANCE_DEFAULT);
@@ -49,22 +52,30 @@ public class Ap9Control_Info {
         notificationManager.notify(0, builder.build());
     }
 
-    public static void Alert(Context mContext) {
+    public static void alert(Context mContext, String title, String content) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("警告")
-                .setMessage("这是一个警告消息")
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        String msgTitle = title;
+        String msgContent = content;
+
+        builder.setTitle(msgTitle)
+                .setMessage(msgContent)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // 点击确定按钮后的操作
                     }
                 })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // 点击取消按钮后的操作
                     }
                 });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
     }
 }

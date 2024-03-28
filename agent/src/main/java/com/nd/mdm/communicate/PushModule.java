@@ -165,17 +165,22 @@ public class PushModule {
 
                 Logger.i(TAG, "onPushMessage, onPushDataArrived: msgtype = " + type);
 
-                for (PushDataOperator pushDataOperator : mPushDataOperators) {
-                    if (pushDataOperator == null) {
-                        continue;
-                    }
+                PushDataOperator pushDataOperator = new PushDataOperator();
+                pushDataOperator.onPushDataArrived(data, pData.getExtraInfos());
 
-                    if (pushDataOperator.isPushMsgTypeMatche(type)) {
-                        pushDataOperator.onPushDataArrived(data, pData.getExtraInfos());
-                        break;
-                    }
-
-                }
+//                for (PushDataOperator pushDataOperator : mPushDataOperators) {
+//                    if (pushDataOperator == null) {
+//                        Logger.i(TAG, "zhouyu pushDataOperator is null!");
+//                        continue;
+//                    }
+//
+//                    if (pushDataOperator.isPushMsgTypeMatche(type)) {
+//                        Logger.i(TAG, "zhouyu push type matched!");
+//                        pushDataOperator.onPushDataArrived(data, pData.getExtraInfos());
+//                        break;
+//                    }
+//
+//                }
 
 //                if (type == AdhocPushMsgType.Feedback.getValue()) {
 //                    doFeedbackCmdReceived(content);

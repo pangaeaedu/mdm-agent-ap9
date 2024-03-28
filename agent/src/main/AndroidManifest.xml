@@ -22,7 +22,7 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         tools:ignore="ProtectedPermissions" />
-
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <application
         android:name="com.nd.mdm.agent.MdmAp9Application"
         android:allowBackup="true"
